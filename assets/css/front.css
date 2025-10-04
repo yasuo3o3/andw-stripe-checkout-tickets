@@ -1,0 +1,100 @@
+.andw-sct-checkout {
+    margin-bottom: 1.5rem;
+}
+
+.andw-sct-button,
+.andw-sct-button-link {
+    display: inline-block;
+    padding: 0.6rem 1.4rem;
+    border-radius: 4px;
+    background: #1a73e8;
+    color: #fff;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.andw-sct-button:hover,
+.andw-sct-button-link:hover {
+    background: #155ec0;
+    color: #fff;
+}
+
+.andw-sct-consent {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.andw-sct-consent__label {
+    margin-left: 0.35rem;
+}
+
+.andw-sct-message {
+    margin-top: 0.6rem;
+    min-height: 1.2rem;
+}
+
+.andw-sct-message--error {
+    color: #b03030;
+}
+
+.andw-sct-thanks__list {
+    list-style: none;
+    padding: 0;
+}
+
+.andw-sct-thanks__list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.andw-sct-thanks__total {
+    font-weight: 700;
+    margin-top: 1rem;
+}
+
+.andw-sct-thanks__support {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.andw-sct-login-required {
+    color: #b03030;
+}
+
+.andw-sct-form__table,
+.andw-sct-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.andw-sct-form__table th,
+.andw-sct-form__table td,
+.andw-sct-table th,
+.andw-sct-table td {
+    border: 1px solid #e0e0e0;
+    padding: 0.5rem;
+    vertical-align: top;
+}
+
+.andw-sct-register,
+.andw-sct-mypage {
+    margin-top: 2rem;
+}
+
+.andw-sct-mypage__actions,
+.andw-sct-mypage__history,
+.andw-sct-mypage__links {
+    margin-top: 1.5rem;
+}
+
+.andw-sct-mypage__links ul {
+    list-style: none;
+    padding: 0;
+}
+
+.andw-sct-mypage__links li {
+    margin-bottom: 0.6rem;
+}

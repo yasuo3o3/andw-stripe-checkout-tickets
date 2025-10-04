@@ -1,0 +1,21 @@
+.andw-sct-table th,
+.andw-sct-table td {
+    vertical-align: middle;
+}
+
+.andw-sct-status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.andw-sct-status--ok {
+    background: #d1f1d1;
+    color: #0b5b0b;
+}
+
+.andw-sct-status--ng {
+    background: #fbdada;
+    color: #8a1c1c;
+}
