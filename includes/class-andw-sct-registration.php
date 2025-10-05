@@ -232,8 +232,8 @@ class Andw_Sct_Registration {
         if ( ! is_user_logged_in() ) {
             $login_url = wp_login_url( add_query_arg( [] ) );
 
-            /* translators: %s: login URL. */
             $login_notice = sprintf(
+                /* translators: %s: login URL. */
                 __( 'ログインが必要です。<a href="%s">こちらからログイン</a>してください。', 'andw-stripe-checkout-tickets' ),
                 esc_url( $login_url )
             );

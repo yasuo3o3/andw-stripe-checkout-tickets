@@ -8,6 +8,7 @@ License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: andw-stripe-checkout-tickets
 Domain Path: /languages
+Stripe Checkout を利用したシンプルなチケット販売とユーザー登録フローを提供します。
 
 == Description ==
 Stripe Checkout を利用したシンプルなチケット販売とユーザー登録フローを提供します。
