@@ -120,10 +120,10 @@ class Andw_Sct_Logger {
         $table = esc_sql( self::get_table_name() );
         $found = (bool) $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT id FROM {$table} WHERE event_id = %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is safe.
+                "SELECT id FROM {$table} WHERE event_id = %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe.
                 $event_id
             )
-        ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Caching handled above.
 
         wp_cache_set( $cache_key, $found ? 1 : 0, 'andw_sct_logger', HOUR_IN_SECONDS );
 
@@ -144,12 +144,12 @@ class Andw_Sct_Logger {
         $table   = esc_sql( self::get_table_name() );
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$table} WHERE customer_id = %s ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is safe.
+                "SELECT * FROM {$table} WHERE customer_id = %s ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe.
                 $customer_id,
                 absint( $limit )
             ),
             ARRAY_A
-        ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Caching handled above.
 
         $results = $results ?: [];
         wp_cache_set( $cache_key, $results, 'andw_sct_logger', HOUR_IN_SECONDS );
@@ -172,12 +172,12 @@ class Andw_Sct_Logger {
         $table   = esc_sql( self::get_table_name() );
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$table} WHERE email = %s ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is safe.
+                "SELECT * FROM {$table} WHERE email = %s ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe.
                 $normalized,
                 absint( $limit )
             ),
             ARRAY_A
-        ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Caching handled above.
 
         $results = $results ?: [];
         wp_cache_set( $cache_key, $results, 'andw_sct_logger', HOUR_IN_SECONDS );
