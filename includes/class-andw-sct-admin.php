@@ -79,22 +79,22 @@ class Andw_Sct_Admin {
     private function get_environment_checks() : array {
         return [
             'php_version'    => [
-                'label'  => __( 'PHP�o�[�W���� (���� 8.1+)', 'andw-sct' ),
+                'label'  => __( 'PHP version (requires 8.1+)', 'andw-sct' ),
                 'status' => version_compare( PHP_VERSION, '8.1', '>=' ),
                 'value'  => PHP_VERSION,
             ],
             'curl'           => [
-                'label'  => __( 'cURL�g��', 'andw-sct' ),
+                'label'  => __( 'cURL extension', 'andw-sct' ),
                 'status' => function_exists( 'curl_version' ),
-                'value'  => function_exists( 'curl_version' ) ? __( '���p�\', 'andw-sct' ) : __( '���C���X�g�[��', 'andw-sct' ),
+                'value'  => function_exists( 'curl_version' ) ? __( 'Available', 'andw-sct' ) : __( 'Not installed', 'andw-sct' ),
             ],
             'rest_available' => [
                 'label'  => __( 'WP HTTP API', 'andw-sct' ),
                 'status' => function_exists( 'wp_remote_post' ),
-                'value'  => function_exists( 'wp_remote_post' ) ? __( '���p�\', 'andw-sct' ) : __( '����`', 'andw-sct' ),
+                'value'  => function_exists( 'wp_remote_post' ) ? __( 'Available', 'andw-sct' ) : __( 'Unavailable', 'andw-sct' ),
             ],
             'https'          => [
-                'label'  => __( '�T�C�gURL (HTTPS)', 'andw-sct' ),
+                'label'  => __( 'Site URL (HTTPS)', 'andw-sct' ),
                 'status' => str_starts_with( get_site_url(), 'https://' ),
                 'value'  => get_site_url(),
             ],
