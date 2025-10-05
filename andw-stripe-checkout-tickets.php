@@ -6,7 +6,7 @@
  * Version: 0.0.1
  * Author: yasuo3o3
  * Author URI: https://yasuo-o.xyz/
- * Text Domain: andw-sct
+ * Text Domain: andw-stripe-checkout-tickets
  * Domain Path: /languages
  * Requires PHP: 8.1
  * Requires at least: 6.5
@@ -45,7 +45,6 @@ register_activation_hook( ANDW_SCT_PLUGIN_FILE, [ 'Andw_Sct_Plugin', 'activate' 
 register_deactivation_hook( ANDW_SCT_PLUGIN_FILE, [ 'Andw_Sct_Plugin', 'deactivate' ] );
 
 add_action( 'plugins_loaded', static function () {
-    load_plugin_textdomain( 'andw-sct', false, dirname( plugin_basename( ANDW_SCT_PLUGIN_FILE ) ) . '/languages' );
     andw_sct_plugin();
 } );
 

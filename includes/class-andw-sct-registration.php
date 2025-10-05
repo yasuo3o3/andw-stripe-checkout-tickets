@@ -25,7 +25,8 @@ class Andw_Sct_Registration {
     }
 
     public function handle_submission() : void {
-        if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+        $request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+        if ( 'POST' !== strtoupper( $request_method ) ) {
             return;
         }
 
@@ -36,7 +37,7 @@ class Andw_Sct_Registration {
         check_admin_referer( self::NONCE_ACTION, 'andw_sct_register_nonce' );
 
         $session_id = isset( $_POST['andw_sct_session_id'] ) ? sanitize_text_field( wp_unslash( $_POST['andw_sct_session_id'] ) ) : '';
-        $password   = isset( $_POST['andw_sct_password'] ) ? (string) wp_unslash( $_POST['andw_sct_password'] ) : '';
+        $password   = isset( $_POST['andw_sct_password'] ) ? (string) wp_unslash( $_POST['andw_sct_password'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Passwords must retain original characters.
         $redirect   = isset( $_POST['andw_sct_redirect'] ) ? esc_url_raw( wp_unslash( $_POST['andw_sct_redirect'] ) ) : '';
 
         $this->last_post = [
@@ -47,16 +48,16 @@ class Andw_Sct_Registration {
         ];
 
         if ( '' === $session_id ) {
-            $this->errors[] = __( 'セッションIDが不明です。再度サンクスページからアクセスしてください。', 'andw-sct' );
+            $this->errors[] = __( 'セッションIDが不明です。再度サンクスページからアクセスしてください。', 'andw-stripe-checkout-tickets' );
             return;
         }
 
         if ( '' === $this->last_post['full_name'] ) {
-            $this->errors[] = __( '氏名は必須項目です。', 'andw-sct' );
+            $this->errors[] = __( '氏名は必須項目です。', 'andw-stripe-checkout-tickets' );
         }
 
         if ( '' === trim( $password ) ) {
-            $this->errors[] = __( 'パスワードを入力してください。', 'andw-sct' );
+            $this->errors[] = __( 'パスワードを入力してください。', 'andw-stripe-checkout-tickets' );
         }
 
         if ( ! empty( $this->errors ) ) {
@@ -74,7 +75,7 @@ class Andw_Sct_Registration {
         $customer_phone = $summary['session']['customer_phone'] ?? '';
 
         if ( '' === $email ) {
-            $this->errors[] = __( 'Stripe側のメールアドレスが確認できませんでした。サポートへご連絡ください。', 'andw-sct' );
+            $this->errors[] = __( 'Stripe側のメールアドレスが確認できませんでした。サポートへご連絡ください。', 'andw-stripe-checkout-tickets' );
             return;
         }
 
@@ -104,7 +105,7 @@ class Andw_Sct_Registration {
         }
 
         if ( ! $user instanceof WP_User ) {
-            $this->errors[] = __( 'ユーザー情報の取得に失敗しました。', 'andw-sct' );
+            $this->errors[] = __( 'ユーザー情報の取得に失敗しました。', 'andw-stripe-checkout-tickets' );
             return;
         }
 
@@ -179,7 +180,7 @@ class Andw_Sct_Registration {
         ob_start();
         ?>
         <div id="andw-sct-register" class="andw-sct-register">
-            <h2><?php esc_html_e( 'ユーザー登録', 'andw-sct' ); ?></h2>
+            <h2><?php esc_html_e( 'ユーザー登録', 'andw-stripe-checkout-tickets' ); ?></h2>
             <?php if ( ! empty( $this->errors ) ) : ?>
                 <div class="andw-sct-message andw-sct-message--error">
                     <?php foreach ( $this->errors as $error ) : ?>
@@ -188,7 +189,7 @@ class Andw_Sct_Registration {
                 </div>
             <?php endif; ?>
             <?php if ( empty( $session_id ) ) : ?>
-                <p><?php esc_html_e( 'StripeのセッションIDが確認できませんでした。サンクスページから再アクセスしてください。', 'andw-sct' ); ?></p>
+                <p><?php esc_html_e( 'StripeのセッションIDが確認できませんでした。サンクスページから再アクセスしてください。', 'andw-stripe-checkout-tickets' ); ?></p>
             <?php else : ?>
                 <form method="post" class="andw-sct-form">
                     <?php wp_nonce_field( self::NONCE_ACTION, 'andw_sct_register_nonce' ); ?>
@@ -197,27 +198,27 @@ class Andw_Sct_Registration {
                     <input type="hidden" name="andw_sct_redirect" value="<?php echo esc_attr( $redirect_url ); ?>" />
                     <table class="andw-sct-form__table">
                         <tr>
-                            <th><?php esc_html_e( 'ご登録メールアドレス', 'andw-sct' ); ?></th>
-                            <td><?php echo esc_html( $email_display ?: __( 'Stripeで入力したメールアドレス', 'andw-sct' ) ); ?></td>
+                            <th><?php esc_html_e( 'ご登録メールアドレス', 'andw-stripe-checkout-tickets' ); ?></th>
+                            <td><?php echo esc_html( $email_display ?: __( 'Stripeで入力したメールアドレス', 'andw-stripe-checkout-tickets' ) ); ?></td>
                         </tr>
                         <tr>
-                            <th><label for="andw-sct-full-name"><?php esc_html_e( '氏名', 'andw-sct' ); ?>*</label></th>
+                            <th><label for="andw-sct-full-name"><?php esc_html_e( '氏名', 'andw-stripe-checkout-tickets' ); ?>*</label></th>
                             <td><input id="andw-sct-full-name" name="andw_sct_full_name" type="text" value="<?php echo esc_attr( $values['full_name'] ); ?>" required /></td>
                         </tr>
                         <tr>
-                            <th><label for="andw-sct-company"><?php esc_html_e( '会社名', 'andw-sct' ); ?></label></th>
+                            <th><label for="andw-sct-company"><?php esc_html_e( '会社名', 'andw-stripe-checkout-tickets' ); ?></label></th>
                             <td><input id="andw-sct-company" name="andw_sct_company" type="text" value="<?php echo esc_attr( $values['company'] ); ?>" /></td>
                         </tr>
                         <tr>
-                            <th><label for="andw-sct-phone"><?php esc_html_e( '電話番号', 'andw-sct' ); ?></label></th>
+                            <th><label for="andw-sct-phone"><?php esc_html_e( '電話番号', 'andw-stripe-checkout-tickets' ); ?></label></th>
                             <td><input id="andw-sct-phone" name="andw_sct_phone" type="text" value="<?php echo esc_attr( $values['phone'] ); ?>" /></td>
                         </tr>
                         <tr>
-                            <th><label for="andw-sct-password"><?php esc_html_e( 'パスワード', 'andw-sct' ); ?>*</label></th>
+                            <th><label for="andw-sct-password"><?php esc_html_e( 'パスワード', 'andw-stripe-checkout-tickets' ); ?>*</label></th>
                             <td><input id="andw-sct-password" name="andw_sct_password" type="password" required /></td>
                         </tr>
                     </table>
-                    <p><button type="submit" class="andw-sct-button"><?php esc_html_e( '登録してマイページへ', 'andw-sct' ); ?></button></p>
+                    <p><button type="submit" class="andw-sct-button"><?php esc_html_e( '登録してマイページへ', 'andw-stripe-checkout-tickets' ); ?></button></p>
                 </form>
             <?php endif; ?>
         </div>
@@ -230,9 +231,16 @@ class Andw_Sct_Registration {
 
         if ( ! is_user_logged_in() ) {
             $login_url = wp_login_url( add_query_arg( [] ) );
+
+            $login_notice = sprintf(
+                /* translators: %s: login URL. */
+                __( 'ログインが必要です。<a href="%s">こちらからログイン</a>してください。', 'andw-stripe-checkout-tickets' ),
+                esc_url( $login_url )
+            );
+
             return sprintf(
                 '<p>%s</p>',
-                wp_kses_post( sprintf( __( 'ログインが必要です。<a href="%s">こちらからログイン</a>してください。', 'andw-sct' ), esc_url( $login_url ) ) )
+                wp_kses_post( $login_notice )
             );
         }
 
@@ -253,24 +261,28 @@ class Andw_Sct_Registration {
         ob_start();
         ?>
         <div class="andw-sct-mypage">
-            <h2><?php echo esc_html( sprintf( __( '%sさんのマイページ', 'andw-sct' ), $user->display_name ) ); ?></h2>
+            <?php
+            /* translators: %s: current user display name. */
+            $page_title = sprintf( __( '%sさんのマイページ', 'andw-stripe-checkout-tickets' ), $user->display_name );
+            ?>
+            <h2><?php echo esc_html( $page_title ); ?></h2>
             <section class="andw-sct-mypage__actions">
-                <h3><?php esc_html_e( 'チケット購入', 'andw-sct' ); ?></h3>
+                <h3><?php esc_html_e( 'チケット購入', 'andw-stripe-checkout-tickets' ); ?></h3>
                 <?php echo $buttons_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
             </section>
             <section class="andw-sct-mypage__history">
-                <h3><?php esc_html_e( '購入履歴', 'andw-sct' ); ?></h3>
+                <h3><?php esc_html_e( '購入履歴', 'andw-stripe-checkout-tickets' ); ?></h3>
                 <?php if ( empty( $logs ) ) : ?>
-                    <p><?php esc_html_e( '購入履歴はまだありません。', 'andw-sct' ); ?></p>
+                    <p><?php esc_html_e( '購入履歴はまだありません。', 'andw-stripe-checkout-tickets' ); ?></p>
                 <?php else : ?>
                     <table class="andw-sct-table">
                         <thead>
                             <tr>
-                                <th><?php esc_html_e( '日時', 'andw-sct' ); ?></th>
-                                <th><?php esc_html_e( '金額', 'andw-sct' ); ?></th>
-                                <th><?php esc_html_e( '通貨', 'andw-sct' ); ?></th>
-                                <th><?php esc_html_e( 'StripeセッションID', 'andw-sct' ); ?></th>
-                                <th><?php esc_html_e( '詳細', 'andw-sct' ); ?></th>
+                                <th><?php esc_html_e( '日時', 'andw-stripe-checkout-tickets' ); ?></th>
+                                <th><?php esc_html_e( '金額', 'andw-stripe-checkout-tickets' ); ?></th>
+                                <th><?php esc_html_e( '通貨', 'andw-stripe-checkout-tickets' ); ?></th>
+                                <th><?php esc_html_e( 'StripeセッションID', 'andw-stripe-checkout-tickets' ); ?></th>
+                                <th><?php esc_html_e( '詳細', 'andw-stripe-checkout-tickets' ); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -283,7 +295,7 @@ class Andw_Sct_Registration {
                                     <td><?php echo esc_html( $entry['session_id'] ); ?></td>
                                     <td>
                                         <?php if ( $detail_url ) : ?>
-                                            <a href="<?php echo esc_url( $detail_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'サンクスページ', 'andw-sct' ); ?></a>
+                                            <a href="<?php echo esc_url( $detail_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'サンクスページ', 'andw-stripe-checkout-tickets' ); ?></a>
                                         <?php else : ?>
                                             &mdash;
                                         <?php endif; ?>
@@ -295,16 +307,16 @@ class Andw_Sct_Registration {
                 <?php endif; ?>
             </section>
             <section class="andw-sct-mypage__links">
-                <h3><?php esc_html_e( '各種導線', 'andw-sct' ); ?></h3>
+                <h3><?php esc_html_e( '各種導線', 'andw-stripe-checkout-tickets' ); ?></h3>
                 <ul>
                     <?php if ( ! empty( $settings['meeting_form_url'] ) ) : ?>
-                        <li><a class="andw-sct-button-link" href="<?php echo esc_url( $settings['meeting_form_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( '打ち合わせフォームを開く', 'andw-sct' ); ?></a></li>
+                        <li><a class="andw-sct-button-link" href="<?php echo esc_url( $settings['meeting_form_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( '初回打ち合わせフォームへ', 'andw-stripe-checkout-tickets' ); ?></a></li>
                     <?php endif; ?>
                     <?php if ( ! empty( $settings['line_url'] ) ) : ?>
-                        <li><a class="andw-sct-button-link" href="<?php echo esc_url( $settings['line_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'LINEで連絡する', 'andw-sct' ); ?></a></li>
+                        <li><a class="andw-sct-button-link" href="<?php echo esc_url( $settings['line_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'LINEで連絡する', 'andw-stripe-checkout-tickets' ); ?></a></li>
                     <?php endif; ?>
                     <?php if ( ! empty( $settings['chat_url'] ) ) : ?>
-                        <li><a class="andw-sct-button-link" href="<?php echo esc_url( $settings['chat_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'チャネルトークで相談する', 'andw-sct' ); ?></a></li>
+                        <li><a class="andw-sct-button-link" href="<?php echo esc_url( $settings['chat_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'チャネルトークで相談する', 'andw-stripe-checkout-tickets' ); ?></a></li>
                     <?php endif; ?>
                 </ul>
             </section>
@@ -312,6 +324,7 @@ class Andw_Sct_Registration {
         <?php
         return ob_get_clean();
     }
+
 
     private function ensure_front_style() : void {
         if ( ! wp_style_is( 'andw-sct-front', 'registered' ) ) {

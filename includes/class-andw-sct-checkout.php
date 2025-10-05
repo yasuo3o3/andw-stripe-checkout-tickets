@@ -34,19 +34,21 @@ class Andw_Sct_Checkout {
      * Handles session creation requests.
      */
     protected function handle_create_session() : void {
-        if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
-            wp_send_json_error( [ 'message' => __( '不正なリクエストです。', 'andw-sct' ) ], 405 );
+        $request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+        if ( 'POST' !== strtoupper( $request_method ) ) {
+            wp_send_json_error( [ 'message' => __( '不正なリクエストです。', 'andw-stripe-checkout-tickets' ) ], 405 );
         }
 
-        $nonce = $_SERVER['HTTP_X_ANDW_SCT_NONCE'] ?? '';
-        if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $nonce ) ), self::NONCE_ACTION ) ) {
-            wp_send_json_error( [ 'message' => __( 'セッションが無効です。再度ページを読み込んでください。', 'andw-sct' ) ], 403 );
+        $nonce_raw = isset( $_SERVER['HTTP_X_ANDW_SCT_NONCE'] ) ? wp_unslash( $_SERVER['HTTP_X_ANDW_SCT_NONCE'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verification requires raw value.
+        $nonce     = is_string( $nonce_raw ) ? $nonce_raw : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verification requires raw value.
+        if ( ! wp_verify_nonce( $nonce, self::NONCE_ACTION ) ) {
+            wp_send_json_error( [ 'message' => __( 'セッションが無効です。再度ページを読み込んでください。', 'andw-stripe-checkout-tickets' ) ], 403 );
         }
 
         $raw_body = file_get_contents( 'php://input' );
         $payload  = json_decode( $raw_body, true );
         if ( ! is_array( $payload ) ) {
-            wp_send_json_error( [ 'message' => __( '入力が正しくありません。', 'andw-sct' ) ], 400 );
+            wp_send_json_error( [ 'message' => __( '入力が正しくありません。', 'andw-stripe-checkout-tickets' ) ], 400 );
         }
 
         $args = [
@@ -59,7 +61,7 @@ class Andw_Sct_Checkout {
         ];
 
         if ( empty( $args['sku'] ) ) {
-            wp_send_json_error( [ 'message' => __( 'SKUが指定されていません。', 'andw-sct' ) ], 400 );
+            wp_send_json_error( [ 'message' => __( 'SKUが指定されていません。', 'andw-stripe-checkout-tickets' ) ], 400 );
         }
 
         $args = apply_filters( 'andw_sct_before_session_create', $args );
@@ -108,22 +110,22 @@ class Andw_Sct_Checkout {
         $settings = Andw_Sct_Settings::get_settings();
         $secret   = $settings['secret_key'];
         if ( empty( $secret ) ) {
-            return new WP_Error( '400', __( 'Stripeシークレットキーが設定されていません。', 'andw-sct' ) );
+            return new WP_Error( '400', __( 'Stripeシークレットキーが設定されていません。', 'andw-stripe-checkout-tickets' ) );
         }
 
         $price_id = $this->get_price_id( $args['sku'] );
         if ( ! $price_id ) {
-            return new WP_Error( '400', __( '有効なSKUではありません。', 'andw-sct' ) );
+            return new WP_Error( '400', __( '有効なSKUではありません。', 'andw-stripe-checkout-tickets' ) );
         }
 
         $success_url = $this->prepare_redirect_url( $args['success_url'], $settings['default_success_url'] );
         if ( ! $success_url ) {
-            return new WP_Error( '400', __( '成功URLの構成に失敗しました。', 'andw-sct' ) );
+            return new WP_Error( '400', __( '成功URLの構成に失敗しました。', 'andw-stripe-checkout-tickets' ) );
         }
 
         $cancel_url = $this->prepare_redirect_url( $args['cancel_url'], $settings['default_cancel_url'] );
         if ( ! $cancel_url ) {
-            return new WP_Error( '400', __( 'キャンセルURLの構成に失敗しました。', 'andw-sct' ) );
+            return new WP_Error( '400', __( 'キャンセルURLの構成に失敗しました。', 'andw-stripe-checkout-tickets' ) );
         }
 
         $metadata = [
@@ -163,7 +165,7 @@ class Andw_Sct_Checkout {
                     'key'    => 'company_name',
                     'label'  => [
                         'type'   => 'custom',
-                        'custom' => __( '会社名', 'andw-sct' ),
+                        'custom' => __( '会社名', 'andw-stripe-checkout-tickets' ),
                     ],
                     'type'    => 'text',
                     'text'    => [
@@ -189,8 +191,8 @@ class Andw_Sct_Checkout {
         );
 
         if ( is_wp_error( $response ) ) {
-            error_log( 'andw-sct: Stripe session create error: ' . $response->get_error_message() );
-            return new WP_Error( '500', __( 'Stripeとの通信に失敗しました。', 'andw-sct' ) );
+            do_action( 'andw_sct_log_error', 'andw-sct: Stripe session create error: ' . $response->get_error_message() );
+            return new WP_Error( '500', __( 'Stripeとの通信に失敗しました。', 'andw-stripe-checkout-tickets' ) );
         }
 
         $code = wp_remote_retrieve_response_code( $response );
@@ -198,8 +200,8 @@ class Andw_Sct_Checkout {
         $data = json_decode( $body, true );
 
         if ( 200 !== $code || empty( $data['url'] ) ) {
-            $message = $data['error']['message'] ?? __( 'Stripeがエラーを返しました。', 'andw-sct' );
-            error_log( 'andw-sct: Stripe session create failed: ' . $body );
+            $message = $data['error']['message'] ?? __( 'Stripeがエラーを返しました。', 'andw-stripe-checkout-tickets' );
+            do_action( 'andw_sct_log_error', 'andw-sct: Stripe session create failed: ' . $body );
             return new WP_Error( (string) $code, esc_html( $message ) );
         }
 
@@ -213,7 +215,7 @@ class Andw_Sct_Checkout {
         $settings = Andw_Sct_Settings::get_settings();
         $secret   = $settings['secret_key'];
         if ( empty( $secret ) ) {
-            return new WP_Error( '400', __( 'Stripeシークレットキーが未設定です。', 'andw-sct' ) );
+            return new WP_Error( '400', __( 'Stripeシークレットキーが未設定です。', 'andw-stripe-checkout-tickets' ) );
         }
 
         $url = sprintf(
@@ -232,8 +234,8 @@ class Andw_Sct_Checkout {
         );
 
         if ( is_wp_error( $response ) ) {
-            error_log( 'andw-sct: Stripe session fetch error: ' . $response->get_error_message() );
-            return new WP_Error( '500', __( 'セッション情報の取得に失敗しました。', 'andw-sct' ) );
+            do_action( 'andw_sct_log_error', 'andw-sct: Stripe session fetch error: ' . $response->get_error_message() );
+            return new WP_Error( '500', __( 'セッション情報の取得に失敗しました。', 'andw-stripe-checkout-tickets' ) );
         }
 
         $code = wp_remote_retrieve_response_code( $response );
@@ -241,8 +243,8 @@ class Andw_Sct_Checkout {
         $data = json_decode( $body, true );
 
         if ( 200 !== $code || empty( $data['id'] ) ) {
-            error_log( 'andw-sct: Stripe session fetch failed: ' . $body );
-            return new WP_Error( (string) $code, __( 'セッション情報の取得でエラーが発生しました。', 'andw-sct' ) );
+            do_action( 'andw_sct_log_error', 'andw-sct: Stripe session fetch failed: ' . $body );
+            return new WP_Error( (string) $code, __( 'セッション情報の取得でエラーが発生しました。', 'andw-stripe-checkout-tickets' ) );
         }
 
         $line_items = [];
@@ -320,3 +322,8 @@ class Andw_Sct_Checkout {
         return implode( '&', array_filter( $segments ) );
     }
 }
+
+
+
+
+

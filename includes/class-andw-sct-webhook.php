@@ -12,109 +12,111 @@ class Andw_Sct_Webhook {
     private const TIMESTAMP_TOLERANCE = 300; // 5 minutes.
 
     public function __construct() {
-        add_action( 'init', [ , 'maybe_handle_webhook' ], 1 );
+        add_action( 'init', [ $this, 'maybe_handle_webhook' ], 1 );
     }
 
     public function maybe_handle_webhook() : void {
-        if ( ! isset( ['andw_sct'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        if ( ! isset( $_GET['andw_sct'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             return;
         }
-         = sanitize_key( wp_unslash( ['andw_sct'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        if ( 'webhook' !==  ) {
+        $action = sanitize_key( wp_unslash( $_GET['andw_sct'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        if ( 'webhook' !== $action ) {
             return;
         }
 
-        ->handle_request();
+        $this->handle_request();
         exit;
     }
 
     private function handle_request() : void {
-        if ( 'POST' !== strtoupper( ['REQUEST_METHOD'] ?? '' ) ) {
-            ->respond( 405, [ 'message' => 'Method Not Allowed' ] );
+        $request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+        if ( 'POST' !== strtoupper( $request_method ) ) {
+            $this->respond( 405, [ 'message' => 'Method Not Allowed' ] );
         }
 
-         = Andw_Sct_Settings::get_settings();
-           = ['webhook_secret'];
-        if ( !  ) {
-            ->respond( 400, [ 'message' => 'Webhook secret not configured.' ] );
+        $settings = Andw_Sct_Settings::get_settings();
+        $secret   = $settings['webhook_secret'] ?? '';
+        if ( ! $secret ) {
+            $this->respond( 400, [ 'message' => 'Webhook secret not configured.' ] );
         }
 
-           = file_get_contents( 'php://input' );
-         = ['HTTP_STRIPE_SIGNATURE'] ?? '';
-        if ( ! ->verify_signature( , ,  ) ) {
-            ->respond( 400, [ 'message' => 'Invalid signature.' ] );
+        $payload        = file_get_contents( 'php://input' );
+        $signature_raw  = isset( $_SERVER['HTTP_STRIPE_SIGNATURE'] ) ? wp_unslash( $_SERVER['HTTP_STRIPE_SIGNATURE'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Stripe signature needs raw string for verification.
+        $signature      = is_string( $signature_raw ) ? $signature_raw : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Stripe signature needs raw string for verification.
+        if ( ! $this->verify_signature( $payload, $signature, $secret ) ) {
+            $this->respond( 400, [ 'message' => 'Invalid signature.' ] );
         }
 
-         = json_decode( , true );
-        if ( ! is_array(  ) || empty( ['id'] ) ) {
-            ->respond( 400, [ 'message' => 'Malformed payload.' ] );
+        $data = json_decode( $payload, true );
+        if ( ! is_array( $data ) || empty( $data['id'] ) ) {
+            $this->respond( 400, [ 'message' => 'Malformed payload.' ] );
         }
 
-         = ['id'];
-        if ( Andw_Sct_Logger::event_exists(  ) ) {
-            ->respond( 200, [ 'status' => 'duplicate' ] );
+        $event_id = $data['id'];
+        if ( Andw_Sct_Logger::event_exists( $event_id ) ) {
+            $this->respond( 200, [ 'status' => 'duplicate' ] );
         }
 
-        if ( 'checkout.session.completed' !== ( ['type'] ?? '' ) ) {
+        if ( 'checkout.session.completed' !== ( $data['type'] ?? '' ) ) {
             Andw_Sct_Logger::insert(
                 [
-                    'event_id'    => ,
-                    'type'        => ['type'] ?? '',
-                    'session_id'  => ['data']['object']['id'] ?? '',
-                    'customer_id' => ['data']['object']['customer'] ?? '',
-                    'email'       => ['data']['object']['customer_details']['email'] ?? '',
-                    'amount_total'=> (int) ( ['data']['object']['amount_total'] ?? 0 ),
-                    'currency'    => strtolower( ['data']['object']['currency'] ?? 'jpy' ),
-                    'created_at'  => gmdate( 'Y-m-d H:i:s', (int) ( ['created'] ?? time() ) ),
+                    'event_id'     => $event_id,
+                    'type'         => $data['type'] ?? '',
+                    'session_id'   => $data['data']['object']['id'] ?? '',
+                    'customer_id'  => $data['data']['object']['customer'] ?? '',
+                    'email'        => $data['data']['object']['customer_details']['email'] ?? '',
+                    'amount_total' => (int) ( $data['data']['object']['amount_total'] ?? 0 ),
+                    'currency'     => strtolower( $data['data']['object']['currency'] ?? 'jpy' ),
+                    'created_at'   => gmdate( 'Y-m-d H:i:s', (int) ( $data['created'] ?? time() ) ),
                 ]
             );
-            ->respond( 200, [ 'status' => 'ignored' ] );
+            $this->respond( 200, [ 'status' => 'ignored' ] );
         }
 
-         = ['data']['object'] ?? [];
+        $object = $data['data']['object'] ?? [];
 
         Andw_Sct_Logger::insert(
             [
-                'event_id'    => ,
-                'type'        => 'checkout.session.completed',
-                'session_id'  => ['id'] ?? '',
-                'customer_id' => ['customer'] ?? '',
-                'email'       => ['customer_details']['email'] ?? '',
-                'amount_total'=> (int) ( ['amount_total'] ?? 0 ),
-                'currency'    => strtolower( ['currency'] ?? 'jpy' ),
-                'created_at'  => gmdate( 'Y-m-d H:i:s', (int) ( ['created'] ?? time() ) ),
+                'event_id'     => $event_id,
+                'type'         => 'checkout.session.completed',
+                'session_id'   => $object['id'] ?? '',
+                'customer_id'  => $object['customer'] ?? '',
+                'email'        => $object['customer_details']['email'] ?? '',
+                'amount_total' => (int) ( $object['amount_total'] ?? 0 ),
+                'currency'     => strtolower( $object['currency'] ?? 'jpy' ),
+                'created_at'   => gmdate( 'Y-m-d H:i:s', (int) ( $object['created'] ?? time() ) ),
             ]
         );
 
-        ->respond( 200, [ 'status' => 'ok' ] );
+        $this->respond( 200, [ 'status' => 'ok' ] );
     }
 
-    private function verify_signature( string , string , string  ) : bool {
-        if ( empty(  ) || empty(  ) ) {
+    private function verify_signature( string $payload, string $signature, string $secret ) : bool {
+        if ( empty( $payload ) || empty( $signature ) ) {
             return false;
         }
-         = [];
-        foreach ( explode( ',',  ) as  ) {
-             = explode( '=', trim(  ), 2 );
-            if ( 2 === count(  ) ) {
-                [ [0] ][] = [1];
+        $parts = [];
+        foreach ( explode( ',', $signature ) as $segment ) {
+            $pair = explode( '=', trim( $segment ), 2 );
+            if ( 2 === count( $pair ) ) {
+                $parts[ $pair[0] ][] = $pair[1];
             }
         }
 
-         = isset( ['t'][0] ) ? (int) ['t'][0] : 0;
-        if ( !  || abs( time() -  ) > self::TIMESTAMP_TOLERANCE ) {
+        $timestamp = isset( $parts['t'][0] ) ? (int) $parts['t'][0] : 0;
+        if ( ! $timestamp || abs( time() - $timestamp ) > self::TIMESTAMP_TOLERANCE ) {
             return false;
         }
 
-         =  . '.' . ;
-               = hash_hmac( 'sha256', ,  );
+        $signed_payload     = $timestamp . '.' . $payload;
+        $expected_signature = hash_hmac( 'sha256', $signed_payload, $secret );
 
-        if ( empty( ['v1'] ) ) {
+        if ( empty( $parts['v1'] ) ) {
             return false;
         }
 
-        foreach ( ['v1'] as  ) {
-            if ( hash_equals( ,  ) ) {
+        foreach ( $parts['v1'] as $candidate ) {
+            if ( hash_equals( $expected_signature, $candidate ) ) {
                 return true;
             }
         }
@@ -122,10 +124,10 @@ class Andw_Sct_Webhook {
         return false;
     }
 
-    private function respond( int , array  ) : void {
-        status_header(  );
+    private function respond( int $status, array $data ) : void {
+        status_header( $status );
         header( 'Content-Type: application/json; charset=utf-8' );
-        echo wp_json_encode(  );
+        echo wp_json_encode( $data );
         exit;
     }
 }

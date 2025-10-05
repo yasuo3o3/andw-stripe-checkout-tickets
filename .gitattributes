@@ -157,7 +157,6 @@ DEVELOPER.md export-ignore
 TESTING.md export-ignore
 TODO.md export-ignore
 README.md export-ignore
-LICENSE export-ignore
 
 # Claude Code関連（配布除外）
 .claude/ export-ignore
