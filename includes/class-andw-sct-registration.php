@@ -231,10 +231,16 @@ class Andw_Sct_Registration {
 
         if ( ! is_user_logged_in() ) {
             $login_url = wp_login_url( add_query_arg( [] ) );
+
             /* translators: %s: login URL. */
+            $login_notice = sprintf(
+                __( 'ログインが必要です。<a href="%s">こちらからログイン</a>してください。', 'andw-stripe-checkout-tickets' ),
+                esc_url( $login_url )
+            );
+
             return sprintf(
                 '<p>%s</p>',
-                wp_kses_post( sprintf( __( 'ログインが必要です。<a href="%s">こちらからログイン</a>してください。', 'andw-stripe-checkout-tickets' ), esc_url( $login_url ) ) )
+                wp_kses_post( $login_notice )
             );
         }
 
@@ -255,10 +261,11 @@ class Andw_Sct_Registration {
         ob_start();
         ?>
         <div class="andw-sct-mypage">
-            <h2><?php
+            <?php
             /* translators: %s: current user display name. */
-            echo esc_html( sprintf( __( '%sさんのマイページ', 'andw-stripe-checkout-tickets' ), $user->display_name ) );
-            ?></h2>
+            $page_title = sprintf( __( '%sさんのマイページ', 'andw-stripe-checkout-tickets' ), $user->display_name );
+            ?>
+            <h2><?php echo esc_html( $page_title ); ?></h2>
             <section class="andw-sct-mypage__actions">
                 <h3><?php esc_html_e( 'チケット購入', 'andw-stripe-checkout-tickets' ); ?></h3>
                 <?php echo $buttons_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -303,7 +310,7 @@ class Andw_Sct_Registration {
                 <h3><?php esc_html_e( '各種導線', 'andw-stripe-checkout-tickets' ); ?></h3>
                 <ul>
                     <?php if ( ! empty( $settings['meeting_form_url'] ) ) : ?>
-                        <li><a class="andw-sct-button-link" href="<?php echo esc_url( $settings['meeting_form_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( '打ち合わせフォームを開く', 'andw-stripe-checkout-tickets' ); ?></a></li>
+                        <li><a class="andw-sct-button-link" href="<?php echo esc_url( $settings['meeting_form_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( '初回打ち合わせフォームへ', 'andw-stripe-checkout-tickets' ); ?></a></li>
                     <?php endif; ?>
                     <?php if ( ! empty( $settings['line_url'] ) ) : ?>
                         <li><a class="andw-sct-button-link" href="<?php echo esc_url( $settings['line_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'LINEで連絡する', 'andw-stripe-checkout-tickets' ); ?></a></li>
@@ -317,6 +324,7 @@ class Andw_Sct_Registration {
         <?php
         return ob_get_clean();
     }
+
 
     private function ensure_front_style() : void {
         if ( ! wp_style_is( 'andw-sct-front', 'registered' ) ) {

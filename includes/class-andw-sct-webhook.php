@@ -29,7 +29,8 @@ class Andw_Sct_Webhook {
     }
 
     private function handle_request() : void {
-        if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+        $request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+        if ( 'POST' !== strtoupper( $request_method ) ) {
             $this->respond( 405, [ 'message' => 'Method Not Allowed' ] );
         }
 
@@ -39,8 +40,9 @@ class Andw_Sct_Webhook {
             $this->respond( 400, [ 'message' => 'Webhook secret not configured.' ] );
         }
 
-        $payload   = file_get_contents( 'php://input' );
-        $signature = $_SERVER['HTTP_STRIPE_SIGNATURE'] ?? '';
+        $payload        = file_get_contents( 'php://input' );
+        $signature_raw  = isset( $_SERVER['HTTP_STRIPE_SIGNATURE'] ) ? wp_unslash( $_SERVER['HTTP_STRIPE_SIGNATURE'] ) : '';
+        $signature      = is_string( $signature_raw ) ? sanitize_text_field( $signature_raw ) : '';
         if ( ! $this->verify_signature( $payload, $signature, $secret ) ) {
             $this->respond( 400, [ 'message' => 'Invalid signature.' ] );
         }

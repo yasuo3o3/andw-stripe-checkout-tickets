@@ -1,4 +1,5 @@
 === andW Stripe Checkout Tickets ===
+Stripe Checkout でチケット販売とユーザー登録をおこなうプラグインです。
 Contributors: yasuo3o3
 Requires at least: 6.5
 Tested up to: 6.8
@@ -24,4 +25,5 @@ Stripe Checkout を利用したシンプルなチケット販売とユーザー�
 == Changelog ==
 = 0.0.1 =
 * Initial release.
+
 

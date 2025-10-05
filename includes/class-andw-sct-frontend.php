@@ -94,10 +94,16 @@ class Andw_Sct_Frontend {
         $require_login = filter_var( $atts['require_login'], FILTER_VALIDATE_BOOLEAN );
         if ( $require_login && ! is_user_logged_in() ) {
             $login_url = wp_login_url( $this->get_current_url() );
+
             /* translators: %s: login URL. */
+            $login_message = sprintf(
+                __( '購入にはログインが必要です。<a href="%s">ログインはこちら</a>。', 'andw-stripe-checkout-tickets' ),
+                esc_url( $login_url )
+            );
+
             return sprintf(
                 '<p class="andw-sct-login-required">%s</p>',
-                wp_kses_post( sprintf( __( '購入にはログインが必要です。<a href="%s">ログインはこちら</a>。', 'andw-stripe-checkout-tickets' ), esc_url( $login_url ) ) )
+                wp_kses_post( $login_message )
             );
         }
 
@@ -187,12 +193,16 @@ class Andw_Sct_Frontend {
             <p><?php esc_html_e( 'ご購入頂いた内容は以下の通りです。', 'andw-stripe-checkout-tickets' ); ?></p>
             <ul class="andw-sct-thanks__list">
                 <?php foreach ( $line_items as $item ) : ?>
+                    <?php
+                    /* translators: %d: purchased quantity. */
+                    $quantity_text = sprintf(
+                        __( '%d点', 'andw-stripe-checkout-tickets' ),
+                        $item['quantity']
+                    );
+                    ?>
                     <li>
                         <span class="andw-sct-thanks__item-name"><?php echo esc_html( $item['description'] ); ?></span>
-                        <span class="andw-sct-thanks__item-qty"><?php
-                            /* translators: %d: purchased quantity. */
-                            echo esc_html( sprintf( __( '%d点', 'andw-stripe-checkout-tickets' ), $item['quantity'] ) );
-                        ?></span>
+                        <span class="andw-sct-thanks__item-qty"><?php echo esc_html( $quantity_text ); ?></span>
                         <span class="andw-sct-thanks__item-amount"><?php echo esc_html( $item['amount_display'] ); ?></span>
                     </li>
                 <?php endforeach; ?>
@@ -200,7 +210,11 @@ class Andw_Sct_Frontend {
             <p class="andw-sct-thanks__total">
                 <?php
                 /* translators: %s: formatted total purchase amount. */
-                echo esc_html( sprintf( __( '合計: %s', 'andw-stripe-checkout-tickets' ), $summary['amount_total_display'] ) );
+                $total_text = sprintf(
+                    __( '合計: %s', 'andw-stripe-checkout-tickets' ),
+                    $summary['amount_total_display']
+                );
+                echo esc_html( $total_text );
                 ?>
             </p>
             <?php if ( ! empty( $session['receipt_url'] ) ) : ?>
@@ -230,12 +244,14 @@ class Andw_Sct_Frontend {
     }
 
     private function get_current_url() : string {
-        $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
-        $request_uri = is_string( $request_uri ) ? $request_uri : '';
+        $request_uri_raw = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+        $request_uri     = is_string( $request_uri_raw ) ? sanitize_text_field( $request_uri_raw ) : '';
         if ( '' === $request_uri ) {
             return home_url( '/' );
         }
 
-        return wp_validate_redirect( home_url( $request_uri ), home_url( '/' ) );
+        $validated = wp_validate_redirect( home_url( $request_uri ), home_url( '/' ) );
+
+        return $validated ?: home_url( '/' );
     }
 }

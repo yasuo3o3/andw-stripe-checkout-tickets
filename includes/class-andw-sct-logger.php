@@ -43,7 +43,7 @@ class Andw_Sct_Logger {
     public static function uninstall() : void {
         global $wpdb;
         $table = esc_sql( self::get_table_name() );
-        $wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Direct schema cleanup on uninstall.
+        $wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Schema cleanup on uninstall.
         delete_option( 'andw_sct_db_version' );
     }
 
@@ -67,7 +67,7 @@ class Andw_Sct_Logger {
             return false;
         }
 
-        return (bool) $wpdb->insert(
+        $result = (bool) $wpdb->insert(
             self::get_table_name(),
             [
                 'event_id'     => sanitize_text_field( $entry['event_id'] ),
@@ -90,43 +90,99 @@ class Andw_Sct_Logger {
                 '%s',
             ]
         );
+
+        if ( $result ) {
+            wp_cache_delete( 'event_' . md5( $entry['event_id'] ), 'andw_sct_logger' );
+
+            if ( ! empty( $entry['customer_id'] ) ) {
+                wp_cache_delete( 'customer_' . md5( $entry['customer_id'] ) . '_20', 'andw_sct_logger' );
+            }
+
+            if ( ! empty( $entry['email'] ) ) {
+                wp_cache_delete( 'email_' . md5( strtolower( $entry['email'] ) ) . '_20', 'andw_sct_logger' );
+            }
+        }
+
+        return $result;
     }
 
     /**
      * Determines if an event has already been logged.
      */
     public static function event_exists( string $event_id ) : bool {
+        $cache_key = 'event_' . md5( $event_id );
+        $cached    = wp_cache_get( $cache_key, 'andw_sct_logger' );
+        if ( false !== $cached ) {
+            return (bool) $cached;
+        }
+
         global $wpdb;
-        $table   = esc_sql( self::get_table_name() );
-        $sql     = sprintf( 'SELECT id FROM %s WHERE event_id = %%s LIMIT 1', $table );
-        $prepared = $wpdb->prepare( $sql, $event_id );
-        return (bool) $wpdb->get_var( $prepared );
+        $table = esc_sql( self::get_table_name() );
+        $found = (bool) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT id FROM {$table} WHERE event_id = %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is safe.
+                $event_id
+            )
+        ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+        wp_cache_set( $cache_key, $found ? 1 : 0, 'andw_sct_logger', HOUR_IN_SECONDS );
+
+        return $found;
     }
 
     /**
      * Returns log entries for a given customer ID.
      */
     public static function get_by_customer( string $customer_id, int $limit = 20 ) : array {
-        global $wpdb;
-        $table    = esc_sql( self::get_table_name() );
-        $sql      = sprintf( 'SELECT * FROM %s WHERE customer_id = %%s ORDER BY created_at DESC LIMIT %%d', $table );
-        $prepared = $wpdb->prepare( $sql, $customer_id, absint( $limit ) );
-        $results  = $wpdb->get_results( $prepared, ARRAY_A );
+        $cache_key = 'customer_' . md5( $customer_id ) . '_' . absint( $limit );
+        $cached    = wp_cache_get( $cache_key, 'andw_sct_logger' );
+        if ( false !== $cached ) {
+            return $cached;
+        }
 
-        return $results ?: [];
+        global $wpdb;
+        $table   = esc_sql( self::get_table_name() );
+        $results = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$table} WHERE customer_id = %s ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is safe.
+                $customer_id,
+                absint( $limit )
+            ),
+            ARRAY_A
+        ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+        $results = $results ?: [];
+        wp_cache_set( $cache_key, $results, 'andw_sct_logger', HOUR_IN_SECONDS );
+
+        return $results;
     }
 
     /**
      * Returns log entries for a given email.
      */
     public static function get_by_email( string $email, int $limit = 20 ) : array {
-        global $wpdb;
-        $table    = esc_sql( self::get_table_name() );
-        $sql      = sprintf( 'SELECT * FROM %s WHERE email = %%s ORDER BY created_at DESC LIMIT %%d', $table );
-        $prepared = $wpdb->prepare( $sql, $email, absint( $limit ) );
-        $results  = $wpdb->get_results( $prepared, ARRAY_A );
+        $normalized = strtolower( $email );
+        $cache_key  = 'email_' . md5( $normalized ) . '_' . absint( $limit );
+        $cached     = wp_cache_get( $cache_key, 'andw_sct_logger' );
+        if ( false !== $cached ) {
+            return $cached;
+        }
 
-        return $results ?: [];
+        global $wpdb;
+        $table   = esc_sql( self::get_table_name() );
+        $results = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$table} WHERE email = %s ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is safe.
+                $normalized,
+                absint( $limit )
+            ),
+            ARRAY_A
+        ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+        $results = $results ?: [];
+        wp_cache_set( $cache_key, $results, 'andw_sct_logger', HOUR_IN_SECONDS );
+
+        return $results;
     }
 
     /**
