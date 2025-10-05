@@ -17,8 +17,8 @@ class Andw_Sct_Admin {
 
     public function register_menu() : void {
         add_menu_page(
-            __( 'andW Tickets', 'andw-sct' ),
-            __( 'andW Tickets', 'andw-sct' ),
+            __( 'andW Tickets', 'andw-stripe-checkout-tickets' ),
+            __( 'andW Tickets', 'andw-stripe-checkout-tickets' ),
             'manage_options',
             'andw-sct',
             [ $this, 'render_page' ],
@@ -43,7 +43,7 @@ class Andw_Sct_Admin {
 
     public function render_page() : void {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'You do not have permission to access this page.', 'andw-sct' ) );
+            wp_die( esc_html__( 'You do not have permission to access this page.', 'andw-stripe-checkout-tickets' ) );
         }
 
         $settings           = Andw_Sct_Settings::get_settings();
@@ -79,22 +79,22 @@ class Andw_Sct_Admin {
     private function get_environment_checks() : array {
         return [
             'php_version'    => [
-                'label'  => __( 'PHP version (requires 8.1+)', 'andw-sct' ),
+                'label'  => __( 'PHP version (requires 8.1+)', 'andw-stripe-checkout-tickets' ),
                 'status' => version_compare( PHP_VERSION, '8.1', '>=' ),
                 'value'  => PHP_VERSION,
             ],
             'curl'           => [
-                'label'  => __( 'cURL extension', 'andw-sct' ),
+                'label'  => __( 'cURL extension', 'andw-stripe-checkout-tickets' ),
                 'status' => function_exists( 'curl_version' ),
-                'value'  => function_exists( 'curl_version' ) ? __( 'Available', 'andw-sct' ) : __( 'Not installed', 'andw-sct' ),
+                'value'  => function_exists( 'curl_version' ) ? __( 'Available', 'andw-stripe-checkout-tickets' ) : __( 'Not installed', 'andw-stripe-checkout-tickets' ),
             ],
             'rest_available' => [
-                'label'  => __( 'WP HTTP API', 'andw-sct' ),
+                'label'  => __( 'WP HTTP API', 'andw-stripe-checkout-tickets' ),
                 'status' => function_exists( 'wp_remote_post' ),
-                'value'  => function_exists( 'wp_remote_post' ) ? __( 'Available', 'andw-sct' ) : __( 'Unavailable', 'andw-sct' ),
+                'value'  => function_exists( 'wp_remote_post' ) ? __( 'Available', 'andw-stripe-checkout-tickets' ) : __( 'Unavailable', 'andw-stripe-checkout-tickets' ),
             ],
             'https'          => [
-                'label'  => __( 'Site URL (HTTPS)', 'andw-sct' ),
+                'label'  => __( 'Site URL (HTTPS)', 'andw-stripe-checkout-tickets' ),
                 'status' => str_starts_with( get_site_url(), 'https://' ),
                 'value'  => get_site_url(),
             ],

@@ -4,65 +4,65 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <div class="wrap andw-sct-admin">
-    <h1><?php esc_html_e( 'andW Tickets �ݒ�', 'andw-sct' ); ?></h1>
+    <h1><?php esc_html_e( 'andW Tickets 設定', 'andw-stripe-checkout-tickets' ); ?></h1>
     <?php settings_errors(); ?>
     <form action="<?php echo esc_url( admin_url( 'options.php' ) ); ?>" method="post">
         <?php settings_fields( 'andw_sct_settings' ); ?>
-        <h2 class="title"><?php esc_html_e( 'API�ݒ�', 'andw-sct' ); ?></h2>
+        <h2 class="title"><?php esc_html_e( 'API設定', 'andw-stripe-checkout-tickets' ); ?></h2>
         <table class="form-table">
             <tr>
-                <th scope="row"><label for="andw-sct-publishable-key"><?php esc_html_e( '���J�\�L�[ (Publishable key)', 'andw-sct' ); ?></label></th>
+                <th scope="row"><label for="andw-sct-publishable-key"><?php esc_html_e( '公開可能キー (Publishable key)', 'andw-stripe-checkout-tickets' ); ?></label></th>
                 <td><input type="text" class="regular-text" id="andw-sct-publishable-key" name="andw_sct_settings[publishable_key]" value="<?php echo esc_attr( $settings['publishable_key'] ); ?>" autocomplete="off" /></td>
             </tr>
             <tr>
-                <th scope="row"><label for="andw-sct-secret-key"><?php esc_html_e( '�V�[�N���b�g�L�[ (Secret key)', 'andw-sct' ); ?></label></th>
+                <th scope="row"><label for="andw-sct-secret-key"><?php esc_html_e( 'シークレットキー (Secret key)', 'andw-stripe-checkout-tickets' ); ?></label></th>
                 <td><input type="text" class="regular-text" id="andw-sct-secret-key" name="andw_sct_settings[secret_key]" value="<?php echo esc_attr( $settings['secret_key'] ); ?>" autocomplete="off" /></td>
             </tr>
             <tr>
-                <th scope="row"><label for="andw-sct-webhook-secret"><?php esc_html_e( 'Webhook�����V�[�N���b�g', 'andw-sct' ); ?></label></th>
+                <th scope="row"><label for="andw-sct-webhook-secret"><?php esc_html_e( 'Webhook署名シークレット', 'andw-stripe-checkout-tickets' ); ?></label></th>
                 <td><input type="text" class="regular-text" id="andw-sct-webhook-secret" name="andw_sct_settings[webhook_secret]" value="<?php echo esc_attr( $settings['webhook_secret'] ); ?>" autocomplete="off" /></td>
             </tr>
         </table>
 
-        <h2 class="title"><?php esc_html_e( 'URL����l', 'andw-sct' ); ?></h2>
+        <h2 class="title"><?php esc_html_e( 'URL関連', 'andw-stripe-checkout-tickets' ); ?></h2>
         <table class="form-table">
             <tr>
-                <th scope="row"><label for="andw-sct-success-url"><?php esc_html_e( '������URL (success_url)', 'andw-sct' ); ?></label></th>
+                <th scope="row"><label for="andw-sct-success-url"><?php esc_html_e( '成功後URL (success_url)', 'andw-stripe-checkout-tickets' ); ?></label></th>
                 <td><input type="url" class="regular-text" id="andw-sct-success-url" name="andw_sct_settings[default_success_url]" value="<?php echo esc_attr( $settings['default_success_url'] ); ?>" /></td>
             </tr>
             <tr>
-                <th scope="row"><label for="andw-sct-cancel-url"><?php esc_html_e( '�L�����Z����URL (cancel_url)', 'andw-sct' ); ?></label></th>
+                <th scope="row"><label for="andw-sct-cancel-url"><?php esc_html_e( 'キャンセル時URL (cancel_url)', 'andw-stripe-checkout-tickets' ); ?></label></th>
                 <td><input type="url" class="regular-text" id="andw-sct-cancel-url" name="andw_sct_settings[default_cancel_url]" value="<?php echo esc_attr( $settings['default_cancel_url'] ); ?>" /></td>
             </tr>
             <tr>
-                <th scope="row"><label for="andw-sct-meeting-url"><?php esc_html_e( '�ł����킹�t�H�[��URL', 'andw-sct' ); ?></label></th>
+                <th scope="row"><label for="andw-sct-meeting-url"><?php esc_html_e( '初回打ち合わせフォームURL', 'andw-stripe-checkout-tickets' ); ?></label></th>
                 <td><input type="url" class="regular-text" id="andw-sct-meeting-url" name="andw_sct_settings[meeting_form_url]" value="<?php echo esc_attr( $settings['meeting_form_url'] ); ?>" /></td>
             </tr>
             <tr>
-                <th scope="row"><label for="andw-sct-support-url"><?php esc_html_e( '�T�|�[�g�^��񍐃����NURL', 'andw-sct' ); ?></label></th>
+                <th scope="row"><label for="andw-sct-support-url"><?php esc_html_e( 'サポート窓口リンクURL', 'andw-stripe-checkout-tickets' ); ?></label></th>
                 <td><input type="url" class="regular-text" id="andw-sct-support-url" name="andw_sct_settings[support_link_url]" value="<?php echo esc_attr( $settings['support_link_url'] ); ?>" /></td>
             </tr>
             <tr>
-                <th scope="row"><label for="andw-sct-support-text"><?php esc_html_e( '�T�|�[�g�����N����', 'andw-sct' ); ?></label></th>
+                <th scope="row"><label for="andw-sct-support-text"><?php esc_html_e( 'サポートリンク文言', 'andw-stripe-checkout-tickets' ); ?></label></th>
                 <td><input type="text" class="regular-text" id="andw-sct-support-text" name="andw_sct_settings[support_link_text]" value="<?php echo esc_attr( $settings['support_link_text'] ); ?>" /></td>
             </tr>
             <tr>
-                <th scope="row"><label for="andw-sct-line-url"><?php esc_html_e( 'LINE����URL', 'andw-sct' ); ?></label></th>
+                <th scope="row"><label for="andw-sct-line-url"><?php esc_html_e( 'LINE誘導URL', 'andw-stripe-checkout-tickets' ); ?></label></th>
                 <td><input type="url" class="regular-text" id="andw-sct-line-url" name="andw_sct_settings[line_url]" value="<?php echo esc_attr( $settings['line_url'] ); ?>" /></td>
             </tr>
             <tr>
-                <th scope="row"><label for="andw-sct-chat-url"><?php esc_html_e( '�`���l���g�[�NURL', 'andw-sct' ); ?></label></th>
+                <th scope="row"><label for="andw-sct-chat-url"><?php esc_html_e( 'チャットサポートURL', 'andw-stripe-checkout-tickets' ); ?></label></th>
                 <td><input type="url" class="regular-text" id="andw-sct-chat-url" name="andw_sct_settings[chat_url]" value="<?php echo esc_attr( $settings['chat_url'] ); ?>" /></td>
             </tr>
         </table>
 
-        <h2 class="title"><?php esc_html_e( 'SKU ? PriceID �}�b�s���O', 'andw-sct' ); ?></h2>
-        <p class="description"><?php esc_html_e( '�e�s��SKU�ɑΉ�����Stripe Price ID��ݒ肵�Ă��������B�󗓍s�͖�������܂��B', 'andw-sct' ); ?></p>
+        <h2 class="title"><?php esc_html_e( 'SKU と PriceID のマッピング', 'andw-stripe-checkout-tickets' ); ?></h2>
+        <p class="description"><?php esc_html_e( '各SKUに対応するStripe Price IDを設定してください。空欄行は無視されます。', 'andw-stripe-checkout-tickets' ); ?></p>
         <table class="widefat andw-sct-table">
             <thead>
                 <tr>
-                    <th><?php esc_html_e( 'SKU', 'andw-sct' ); ?></th>
-                    <th><?php esc_html_e( 'Price ID', 'andw-sct' ); ?></th>
+                    <th><?php esc_html_e( 'SKU', 'andw-stripe-checkout-tickets' ); ?></th>
+                    <th><?php esc_html_e( 'Price ID', 'andw-stripe-checkout-tickets' ); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -82,14 +82,14 @@ if ( ! defined( 'ABSPATH' ) ) {
             </tbody>
         </table>
 
-        <h2 class="title"><?php esc_html_e( '�{�^����`�i�V���[�g�R�[�h�j', 'andw-sct' ); ?></h2>
+        <h2 class="title"><?php esc_html_e( 'ボタン設定（ショートコード）', 'andw-stripe-checkout-tickets' ); ?></h2>
         <p class="description">
-            <?php esc_html_e( '1�s�ɂ� 1 �{�^���B�`��: group_slug|sku|�\�����x��|����|require_login(true/false)', 'andw-sct' ); ?><br />
-            <?php esc_html_e( '��: default|60m|60���`�P�b�g���w��|1|false', 'andw-sct' ); ?>
+            <?php esc_html_e( '1行につき1ボタン。形式: group_slug|sku|表示ラベル|数量|require_login(true/false)', 'andw-stripe-checkout-tickets' ); ?><br />
+            <?php esc_html_e( '例: default|60m|60分チケット購入|1|false', 'andw-stripe-checkout-tickets' ); ?>
         </p>
         <textarea class="large-text code" rows="8" name="andw_sct_settings[button_groups_text]"><?php echo esc_textarea( $button_groups_text ); ?></textarea>
         <p>
-            <label for="andw-sct-default-group"><?php esc_html_e( '�f�t�H���g�̃{�^���O���[�v', 'andw-sct' ); ?></label>
+            <label for="andw-sct-default-group"><?php esc_html_e( 'デフォルトのボタングループ', 'andw-stripe-checkout-tickets' ); ?></label>
             <select id="andw-sct-default-group" name="andw_sct_settings[default_button_group]">
                 <?php foreach ( array_keys( $settings['button_groups'] ?? [] ) as $group_slug ) : ?>
                     <option value="<?php echo esc_attr( $group_slug ); ?>" <?php selected( $settings['default_button_group'], $group_slug ); ?>><?php echo esc_html( $group_slug ); ?></option>
@@ -97,22 +97,22 @@ if ( ! defined( 'ABSPATH' ) ) {
             </select>
         </p>
 
-        <h2 class="title"><?php esc_html_e( '���ӕ���', 'andw-sct' ); ?></h2>
+        <h2 class="title"><?php esc_html_e( '同意確認', 'andw-stripe-checkout-tickets' ); ?></h2>
         <p>
             <label>
                 <input type="checkbox" name="andw_sct_settings[consent_enabled]" value="1" <?php checked( $settings['consent_enabled'] ); ?> />
-                <?php esc_html_e( '���Ӄ`�F�b�N�{�b�N�X��\������', 'andw-sct' ); ?>
+                <?php esc_html_e( '同意チェックボックスを表示する', 'andw-stripe-checkout-tickets' ); ?>
             </label>
         </p>
         <textarea name="andw_sct_settings[consent_text]" class="large-text" rows="4"><?php echo esc_textarea( $settings['consent_text'] ); ?></textarea>
 
-        <h2 class="title"><?php esc_html_e( '����e�X�g', 'andw-sct' ); ?></h2>
+        <h2 class="title"><?php esc_html_e( '環境テスト', 'andw-stripe-checkout-tickets' ); ?></h2>
         <table class="widefat andw-sct-table">
             <thead>
                 <tr>
-                    <th><?php esc_html_e( '����', 'andw-sct' ); ?></th>
-                    <th><?php esc_html_e( '���', 'andw-sct' ); ?></th>
-                    <th><?php esc_html_e( '�⑫', 'andw-sct' ); ?></th>
+                    <th><?php esc_html_e( '項目', 'andw-stripe-checkout-tickets' ); ?></th>
+                    <th><?php esc_html_e( '判定', 'andw-stripe-checkout-tickets' ); ?></th>
+                    <th><?php esc_html_e( '詳細', 'andw-stripe-checkout-tickets' ); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -121,9 +121,9 @@ if ( ! defined( 'ABSPATH' ) ) {
                         <td><?php echo esc_html( $check['label'] ); ?></td>
                         <td>
                             <?php if ( $check['status'] ) : ?>
-                                <span class="andw-sct-status andw-sct-status--ok"><?php esc_html_e( 'OK', 'andw-sct' ); ?></span>
+                                <span class="andw-sct-status andw-sct-status--ok"><?php esc_html_e( 'OK', 'andw-stripe-checkout-tickets' ); ?></span>
                             <?php else : ?>
-                                <span class="andw-sct-status andw-sct-status--ng"><?php esc_html_e( '�v�m�F', 'andw-sct' ); ?></span>
+                                <span class="andw-sct-status andw-sct-status--ng"><?php esc_html_e( '要確認', 'andw-stripe-checkout-tickets' ); ?></span>
                             <?php endif; ?>
                         </td>
                         <td><?php echo esc_html( $check['value'] ); ?></td>
@@ -132,6 +132,6 @@ if ( ! defined( 'ABSPATH' ) ) {
             </tbody>
         </table>
 
-        <?php submit_button( __( '�ݒ��ۑ�', 'andw-sct' ) ); ?>
+        <?php submit_button( __( '設定を保存', 'andw-stripe-checkout-tickets' ) ); ?>
     </form>
 </div>

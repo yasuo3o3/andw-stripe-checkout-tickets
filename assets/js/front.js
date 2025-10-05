@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     if ( typeof window.andwSctData === 'undefined' ) {
         return;
     }
@@ -31,14 +31,14 @@
         };
 
         if ( container.dataset.requireLogin === 'true' && ! window.andwSctData.isLoggedIn ) {
-            setMessage( window.andwSctData.messages.loginRequired || __( 'ログインが必要です。', 'andw-sct' ) );
+            setMessage( window.andwSctData.messages.loginRequired || __( 'ログインが必要です。', 'andw-stripe-checkout-tickets' ) );
             return;
         }
 
         if ( window.andwSctData.consent.enabled ) {
             const consentInput = container.querySelector( '.andw-sct-consent__input' );
             if ( consentInput && ! consentInput.checked ) {
-                setMessage( window.andwSctData.consent.message || __( '購入前に同意チェックを入れてください。', 'andw-sct' ) );
+                setMessage( window.andwSctData.consent.message || __( '購入前に同意チェックを入れてください。', 'andw-stripe-checkout-tickets' ) );
                 return;
             }
         }
@@ -63,7 +63,7 @@
             button.dataset.processing = 'true';
             button.setAttribute( 'aria-busy', 'true' );
             button.disabled = true;
-            setMessage( window.andwSctData.messages.processing || __( '処理中...', 'andw-sct' ), false );
+            setMessage( window.andwSctData.messages.processing || __( '処理中...', 'andw-stripe-checkout-tickets' ), false );
 
             const response = await fetch( window.andwSctData.endpoint, {
                 method: 'POST',
@@ -81,10 +81,10 @@
                 return;
             }
 
-            const errorMessage = ( data && data.data && data.data.message ) || window.andwSctData.messages.genericError || __( 'チェックアウトの開始に失敗しました。', 'andw-sct' );
+            const errorMessage = ( data && data.data && data.data.message ) || window.andwSctData.messages.genericError || __( 'チェックアウトの開始に失敗しました。', 'andw-stripe-checkout-tickets' );
             setMessage( errorMessage );
         } catch ( error ) {
-            setMessage( window.andwSctData.messages.genericError || __( 'チェックアウトの開始に失敗しました。', 'andw-sct' ) );
+            setMessage( window.andwSctData.messages.genericError || __( 'チェックアウトの開始に失敗しました。', 'andw-stripe-checkout-tickets' ) );
         } finally {
             button.dataset.processing = 'false';
             button.removeAttribute( 'aria-busy' );

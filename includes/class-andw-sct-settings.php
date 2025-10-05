@@ -49,7 +49,7 @@ class Andw_Sct_Settings {
             'default_success_url'  => '',
             'default_cancel_url'   => '',
             'consent_enabled'      => false,
-            'consent_text'         => __( '�`�P�b�g�w���ɂ�����A���p�K��ƃv���C�o�V�[�|���V�[�ɓ��ӂ��܂��B', 'andw-sct' ),
+            'consent_text'         => __( 'チケット購入に際し、利用規約とプライバシーポリシーに同意します。', 'andw-stripe-checkout-tickets' ),
             'sku_price_map'        => [],
             'button_groups'        => [
                 'default' => [],
@@ -57,7 +57,7 @@ class Andw_Sct_Settings {
             'default_button_group' => 'default',
             'meeting_form_url'     => '',
             'support_link_url'     => '',
-            'support_link_text'    => __( '��������[�����󂯎�����ꍇ�͂����炩�炲�A�����������B', 'andw-sct' ),
+            'support_link_text'    => __( 'ご不明点がございましたらこちらよりお問い合わせください。', 'andw-stripe-checkout-tickets' ),
             'line_url'             => '',
             'chat_url'             => '',
         ];
@@ -112,8 +112,8 @@ class Andw_Sct_Settings {
                 if ( '' === $line || str_starts_with( $line, '#' ) ) {
                     continue;
                 }
-                $parts          = array_map( 'trim', explode( '|', $line ) );
-                $parts          = array_pad( $parts, 5, '' );
+                $parts = array_map( 'trim', explode( '|', $line ) );
+                $parts = array_pad( $parts, 5, '' );
                 [ $group_slug, $sku, $label, $qty, $requires_login ] = $parts;
 
                 $group_slug = sanitize_key( $group_slug );

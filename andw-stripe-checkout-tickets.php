@@ -45,7 +45,7 @@ register_activation_hook( ANDW_SCT_PLUGIN_FILE, [ 'Andw_Sct_Plugin', 'activate' 
 register_deactivation_hook( ANDW_SCT_PLUGIN_FILE, [ 'Andw_Sct_Plugin', 'deactivate' ] );
 
 add_action( 'plugins_loaded', static function () {
-    load_plugin_textdomain( 'andw-sct', false, dirname( plugin_basename( ANDW_SCT_PLUGIN_FILE ) ) . '/languages' );
+    load_plugin_textdomain( 'andw-stripe-checkout-tickets', false, dirname( plugin_basename( ANDW_SCT_PLUGIN_FILE ) ) . '/languages' );
     andw_sct_plugin();
 } );
 
