@@ -120,8 +120,8 @@ class Andw_Sct_Logger {
         $table_name = self::get_table_name();
         $found = (bool) $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT id FROM {$table_name} WHERE event_id = %s LIMIT 1",
-                $event_id
+                "SELECT id FROM {$table_name} WHERE event_id = %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is a known safe identifier built from $wpdb->prefix
+                sanitize_text_field( $event_id )
             )
         ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Caching handled above.
 
@@ -144,8 +144,8 @@ class Andw_Sct_Logger {
         $table_name = self::get_table_name();
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$table_name} WHERE customer_id = %s ORDER BY created_at DESC LIMIT %d",
-                $customer_id,
+                "SELECT * FROM {$table_name} WHERE customer_id = %s ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is a known safe identifier built from $wpdb->prefix
+                sanitize_text_field( $customer_id ),
                 absint( $limit )
             ),
             ARRAY_A
@@ -172,8 +172,8 @@ class Andw_Sct_Logger {
         $table_name = self::get_table_name();
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$table_name} WHERE email = %s ORDER BY created_at DESC LIMIT %d",
-                $normalized,
+                "SELECT * FROM {$table_name} WHERE email = %s ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is a known safe identifier built from $wpdb->prefix
+                sanitize_email( $normalized ),
                 absint( $limit )
             ),
             ARRAY_A
@@ -187,6 +187,8 @@ class Andw_Sct_Logger {
 
     /**
      * Table name helper.
+     * Table name is built from safe components only (wpdb prefix + fixed suffix).
+     * No external input is used in table name construction.
      */
     public static function get_table_name() : string {
         global $wpdb;
