@@ -11,7 +11,7 @@ Text Domain: andw-stripe-checkout-tickets
 Domain Path: /languages
 
 == Description ==
-Stripe Checkout を利用したシンプルなチケット販売とユーザー登録フローを提供します。短いショートコードでボタンやマイページを表示でき、Webhook 連携で購入履歴を記録します。
+Stripe Checkout を利用したシンプルなチケット販売とユーザー登録フローを提供します。
 
 == Installation ==
 1. プラグイン ZIP をアップロードして有効化します。
