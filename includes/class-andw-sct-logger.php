@@ -118,6 +118,7 @@ class Andw_Sct_Logger {
 
         global $wpdb;
         $table_name = self::get_table_name();
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Direct query via $wpdb->get_results() is safe with $wpdb->prepare().
         $found = (bool) $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT id FROM {$table_name} WHERE event_id = %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is a known safe identifier built from $wpdb->prefix
@@ -142,6 +143,7 @@ class Andw_Sct_Logger {
 
         global $wpdb;
         $table_name = self::get_table_name();
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Direct query via $wpdb->get_results() is safe with $wpdb->prepare().
         $results = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM {$table_name} WHERE customer_id = %s ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is a known safe identifier built from $wpdb->prefix
@@ -170,6 +172,7 @@ class Andw_Sct_Logger {
 
         global $wpdb;
         $table_name = self::get_table_name();
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Direct query via $wpdb->get_results() is safe with $wpdb->prepare().
         $results = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM {$table_name} WHERE email = %s ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is a known safe identifier built from $wpdb->prefix
