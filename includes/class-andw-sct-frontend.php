@@ -194,8 +194,8 @@ class Andw_Sct_Frontend {
             <ul class="andw-sct-thanks__list">
                 <?php foreach ( $line_items as $item ) : ?>
                     <?php
-                    /* translators: %d: purchased quantity. */
                     $quantity_text = sprintf(
+                        /* translators: %d: purchased quantity. */
                         __( '%d点', 'andw-stripe-checkout-tickets' ),
                         $item['quantity']
                     );
@@ -209,8 +209,8 @@ class Andw_Sct_Frontend {
             </ul>
             <p class="andw-sct-thanks__total">
                 <?php
-                /* translators: %s: formatted total purchase amount. */
                 $total_text = sprintf(
+                    /* translators: %s: formatted total purchase amount. */
                     __( '合計: %s', 'andw-stripe-checkout-tickets' ),
                     $summary['amount_total_display']
                 );
