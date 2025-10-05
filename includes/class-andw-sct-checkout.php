@@ -34,12 +34,14 @@ class Andw_Sct_Checkout {
      * Handles session creation requests.
      */
     protected function handle_create_session() : void {
-        if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+        $request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+        if ( 'POST' !== strtoupper( $request_method ) ) {
             wp_send_json_error( [ 'message' => __( '不正なリクエストです。', 'andw-stripe-checkout-tickets' ) ], 405 );
         }
 
-        $nonce = $_SERVER['HTTP_X_ANDW_SCT_NONCE'] ?? '';
-        if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $nonce ) ), self::NONCE_ACTION ) ) {
+        $nonce_raw = isset( $_SERVER['HTTP_X_ANDW_SCT_NONCE'] ) ? wp_unslash( $_SERVER['HTTP_X_ANDW_SCT_NONCE'] ) : '';
+        $nonce     = sanitize_text_field( $nonce_raw );
+        if ( ! wp_verify_nonce( $nonce, self::NONCE_ACTION ) ) {
             wp_send_json_error( [ 'message' => __( 'セッションが無効です。再度ページを読み込んでください。', 'andw-stripe-checkout-tickets' ) ], 403 );
         }
 
@@ -189,7 +191,7 @@ class Andw_Sct_Checkout {
         );
 
         if ( is_wp_error( $response ) ) {
-            error_log( 'andw-sct: Stripe session create error: ' . $response->get_error_message() );
+            do_action( 'andw_sct_log_error', 'andw-sct: Stripe session create error: ' . $response->get_error_message() );
             return new WP_Error( '500', __( 'Stripeとの通信に失敗しました。', 'andw-stripe-checkout-tickets' ) );
         }
 
@@ -199,7 +201,7 @@ class Andw_Sct_Checkout {
 
         if ( 200 !== $code || empty( $data['url'] ) ) {
             $message = $data['error']['message'] ?? __( 'Stripeがエラーを返しました。', 'andw-stripe-checkout-tickets' );
-            error_log( 'andw-sct: Stripe session create failed: ' . $body );
+            do_action( 'andw_sct_log_error', 'andw-sct: Stripe session create failed: ' . $body );
             return new WP_Error( (string) $code, esc_html( $message ) );
         }
 
@@ -232,7 +234,7 @@ class Andw_Sct_Checkout {
         );
 
         if ( is_wp_error( $response ) ) {
-            error_log( 'andw-sct: Stripe session fetch error: ' . $response->get_error_message() );
+            do_action( 'andw_sct_log_error', 'andw-sct: Stripe session fetch error: ' . $response->get_error_message() );
             return new WP_Error( '500', __( 'セッション情報の取得に失敗しました。', 'andw-stripe-checkout-tickets' ) );
         }
 
@@ -241,7 +243,7 @@ class Andw_Sct_Checkout {
         $data = json_decode( $body, true );
 
         if ( 200 !== $code || empty( $data['id'] ) ) {
-            error_log( 'andw-sct: Stripe session fetch failed: ' . $body );
+            do_action( 'andw_sct_log_error', 'andw-sct: Stripe session fetch failed: ' . $body );
             return new WP_Error( (string) $code, __( 'セッション情報の取得でエラーが発生しました。', 'andw-stripe-checkout-tickets' ) );
         }
 

@@ -94,6 +94,7 @@ class Andw_Sct_Frontend {
         $require_login = filter_var( $atts['require_login'], FILTER_VALIDATE_BOOLEAN );
         if ( $require_login && ! is_user_logged_in() ) {
             $login_url = wp_login_url( $this->get_current_url() );
+            /* translators: %s: login URL. */
             return sprintf(
                 '<p class="andw-sct-login-required">%s</p>',
                 wp_kses_post( sprintf( __( '購入にはログインが必要です。<a href="%s">ログインはこちら</a>。', 'andw-stripe-checkout-tickets' ), esc_url( $login_url ) ) )
@@ -188,13 +189,19 @@ class Andw_Sct_Frontend {
                 <?php foreach ( $line_items as $item ) : ?>
                     <li>
                         <span class="andw-sct-thanks__item-name"><?php echo esc_html( $item['description'] ); ?></span>
-                        <span class="andw-sct-thanks__item-qty"><?php echo esc_html( sprintf( __( '%d点', 'andw-stripe-checkout-tickets' ), $item['quantity'] ) ); ?></span>
+                        <span class="andw-sct-thanks__item-qty"><?php
+                            /* translators: %d: purchased quantity. */
+                            echo esc_html( sprintf( __( '%d点', 'andw-stripe-checkout-tickets' ), $item['quantity'] ) );
+                        ?></span>
                         <span class="andw-sct-thanks__item-amount"><?php echo esc_html( $item['amount_display'] ); ?></span>
                     </li>
                 <?php endforeach; ?>
             </ul>
             <p class="andw-sct-thanks__total">
-                <?php echo esc_html( sprintf( __( '合計: %s', 'andw-stripe-checkout-tickets' ), $summary['amount_total_display'] ) ); ?>
+                <?php
+                /* translators: %s: formatted total purchase amount. */
+                echo esc_html( sprintf( __( '合計: %s', 'andw-stripe-checkout-tickets' ), $summary['amount_total_display'] ) );
+                ?>
             </p>
             <?php if ( ! empty( $session['receipt_url'] ) ) : ?>
                 <p><a class="andw-sct-button-link" href="<?php echo esc_url( $session['receipt_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Stripeの領収書を開く', 'andw-stripe-checkout-tickets' ); ?></a></p>
@@ -223,11 +230,12 @@ class Andw_Sct_Frontend {
     }
 
     private function get_current_url() : string {
-        $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+        $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+        $request_uri = is_string( $request_uri ) ? $request_uri : '';
         if ( '' === $request_uri ) {
             return home_url( '/' );
         }
 
-        return home_url( $request_uri );
+        return wp_validate_redirect( home_url( $request_uri ), home_url( '/' ) );
     }
 }

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Handles registration flow linked to Stripe sessions.
  */
@@ -25,7 +25,8 @@ class Andw_Sct_Registration {
     }
 
     public function handle_submission() : void {
-        if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+        $request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+        if ( 'POST' !== strtoupper( $request_method ) ) {
             return;
         }
 
@@ -36,7 +37,7 @@ class Andw_Sct_Registration {
         check_admin_referer( self::NONCE_ACTION, 'andw_sct_register_nonce' );
 
         $session_id = isset( $_POST['andw_sct_session_id'] ) ? sanitize_text_field( wp_unslash( $_POST['andw_sct_session_id'] ) ) : '';
-        $password   = isset( $_POST['andw_sct_password'] ) ? (string) wp_unslash( $_POST['andw_sct_password'] ) : '';
+        $password   = isset( $_POST['andw_sct_password'] ) ? (string) wp_unslash( $_POST['andw_sct_password'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Passwords must retain original characters.
         $redirect   = isset( $_POST['andw_sct_redirect'] ) ? esc_url_raw( wp_unslash( $_POST['andw_sct_redirect'] ) ) : '';
 
         $this->last_post = [
@@ -230,6 +231,7 @@ class Andw_Sct_Registration {
 
         if ( ! is_user_logged_in() ) {
             $login_url = wp_login_url( add_query_arg( [] ) );
+            /* translators: %s: login URL. */
             return sprintf(
                 '<p>%s</p>',
                 wp_kses_post( sprintf( __( 'ログインが必要です。<a href="%s">こちらからログイン</a>してください。', 'andw-stripe-checkout-tickets' ), esc_url( $login_url ) ) )
@@ -253,7 +255,10 @@ class Andw_Sct_Registration {
         ob_start();
         ?>
         <div class="andw-sct-mypage">
-            <h2><?php echo esc_html( sprintf( __( '%sさんのマイページ', 'andw-stripe-checkout-tickets' ), $user->display_name ) ); ?></h2>
+            <h2><?php
+            /* translators: %s: current user display name. */
+            echo esc_html( sprintf( __( '%sさんのマイページ', 'andw-stripe-checkout-tickets' ), $user->display_name ) );
+            ?></h2>
             <section class="andw-sct-mypage__actions">
                 <h3><?php esc_html_e( 'チケット購入', 'andw-stripe-checkout-tickets' ); ?></h3>
                 <?php echo $buttons_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

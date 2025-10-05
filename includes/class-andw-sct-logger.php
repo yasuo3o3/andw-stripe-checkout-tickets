@@ -42,8 +42,8 @@ class Andw_Sct_Logger {
      */
     public static function uninstall() : void {
         global $wpdb;
-        $table = self::get_table_name();
-        $wpdb->query( "DROP TABLE IF EXISTS {$table}" );
+        $table = esc_sql( self::get_table_name() );
+        $wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Direct schema cleanup on uninstall.
         delete_option( 'andw_sct_db_version' );
     }
 
@@ -66,6 +66,7 @@ class Andw_Sct_Logger {
         if ( empty( $entry['event_id'] ) ) {
             return false;
         }
+
         return (bool) $wpdb->insert(
             self::get_table_name(),
             [
@@ -96,9 +97,10 @@ class Andw_Sct_Logger {
      */
     public static function event_exists( string $event_id ) : bool {
         global $wpdb;
-        $table = self::get_table_name();
-        $sql   = $wpdb->prepare( "SELECT id FROM {$table} WHERE event_id = %s LIMIT 1", $event_id );
-        return (bool) $wpdb->get_var( $sql );
+        $table   = esc_sql( self::get_table_name() );
+        $sql     = sprintf( 'SELECT id FROM %s WHERE event_id = %%s LIMIT 1', $table );
+        $prepared = $wpdb->prepare( $sql, $event_id );
+        return (bool) $wpdb->get_var( $prepared );
     }
 
     /**
@@ -106,13 +108,12 @@ class Andw_Sct_Logger {
      */
     public static function get_by_customer( string $customer_id, int $limit = 20 ) : array {
         global $wpdb;
-        $table = self::get_table_name();
-        $sql   = $wpdb->prepare(
-            "SELECT * FROM {$table} WHERE customer_id = %s ORDER BY created_at DESC LIMIT %d",
-            $customer_id,
-            absint( $limit )
-        );
-        return $wpdb->get_results( $sql, ARRAY_A ) ?: [];
+        $table    = esc_sql( self::get_table_name() );
+        $sql      = sprintf( 'SELECT * FROM %s WHERE customer_id = %%s ORDER BY created_at DESC LIMIT %%d', $table );
+        $prepared = $wpdb->prepare( $sql, $customer_id, absint( $limit ) );
+        $results  = $wpdb->get_results( $prepared, ARRAY_A );
+
+        return $results ?: [];
     }
 
     /**
@@ -120,13 +121,12 @@ class Andw_Sct_Logger {
      */
     public static function get_by_email( string $email, int $limit = 20 ) : array {
         global $wpdb;
-        $table = self::get_table_name();
-        $sql   = $wpdb->prepare(
-            "SELECT * FROM {$table} WHERE email = %s ORDER BY created_at DESC LIMIT %d",
-            $email,
-            absint( $limit )
-        );
-        return $wpdb->get_results( $sql, ARRAY_A ) ?: [];
+        $table    = esc_sql( self::get_table_name() );
+        $sql      = sprintf( 'SELECT * FROM %s WHERE email = %%s ORDER BY created_at DESC LIMIT %%d', $table );
+        $prepared = $wpdb->prepare( $sql, $email, absint( $limit ) );
+        $results  = $wpdb->get_results( $prepared, ARRAY_A );
+
+        return $results ?: [];
     }
 
     /**
