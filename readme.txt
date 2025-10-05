@@ -1,5 +1,4 @@
 === andW Stripe Checkout Tickets ===
-Stripe Checkoutによるチケット販売とユーザー登録機能を提供します。
 Contributors: yasuo3o3
 Requires at least: 6.5
 Tested up to: 6.8
