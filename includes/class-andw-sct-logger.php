@@ -117,10 +117,11 @@ class Andw_Sct_Logger {
         }
 
         global $wpdb;
-        $table = esc_sql( self::get_table_name() );
+        $table_name = esc_sql( self::get_table_name() );
+        $sql = sprintf( "SELECT id FROM %s WHERE event_id = %%s LIMIT 1", $table_name );
         $found = (bool) $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT id FROM {$table} WHERE event_id = %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe.
+                $sql,
                 $event_id
             )
         ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Caching handled above.
@@ -141,10 +142,11 @@ class Andw_Sct_Logger {
         }
 
         global $wpdb;
-        $table   = esc_sql( self::get_table_name() );
+        $table_name = esc_sql( self::get_table_name() );
+        $sql = sprintf( "SELECT * FROM %s WHERE customer_id = %%s ORDER BY created_at DESC LIMIT %%d", $table_name );
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$table} WHERE customer_id = %s ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe.
+                $sql,
                 $customer_id,
                 absint( $limit )
             ),
@@ -169,10 +171,11 @@ class Andw_Sct_Logger {
         }
 
         global $wpdb;
-        $table   = esc_sql( self::get_table_name() );
+        $table_name = esc_sql( self::get_table_name() );
+        $sql = sprintf( "SELECT * FROM %s WHERE email = %%s ORDER BY created_at DESC LIMIT %%d", $table_name );
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$table} WHERE email = %s ORDER BY created_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe.
+                $sql,
                 $normalized,
                 absint( $limit )
             ),
