@@ -39,7 +39,7 @@ class Andw_Sct_Checkout {
             wp_send_json_error( [ 'message' => __( '不正なリクエストです。', 'andw-stripe-checkout-tickets' ) ], 405 );
         }
 
-        $nonce_raw = isset( $_SERVER['HTTP_X_ANDW_SCT_NONCE'] ) ? wp_unslash( $_SERVER['HTTP_X_ANDW_SCT_NONCE'] ) : '';
+        $nonce_raw = isset( $_SERVER['HTTP_X_ANDW_SCT_NONCE'] ) ? wp_unslash( $_SERVER['HTTP_X_ANDW_SCT_NONCE'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verification requires raw value.
         $nonce     = is_string( $nonce_raw ) ? $nonce_raw : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verification requires raw value.
         if ( ! wp_verify_nonce( $nonce, self::NONCE_ACTION ) ) {
             wp_send_json_error( [ 'message' => __( 'セッションが無効です。再度ページを読み込んでください。', 'andw-stripe-checkout-tickets' ) ], 403 );

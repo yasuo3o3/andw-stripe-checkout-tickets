@@ -41,7 +41,7 @@ class Andw_Sct_Webhook {
         }
 
         $payload        = file_get_contents( 'php://input' );
-        $signature_raw  = isset( $_SERVER['HTTP_STRIPE_SIGNATURE'] ) ? wp_unslash( $_SERVER['HTTP_STRIPE_SIGNATURE'] ) : '';
+        $signature_raw  = isset( $_SERVER['HTTP_STRIPE_SIGNATURE'] ) ? wp_unslash( $_SERVER['HTTP_STRIPE_SIGNATURE'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Stripe signature needs raw string for verification.
         $signature      = is_string( $signature_raw ) ? $signature_raw : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Stripe signature needs raw string for verification.
         if ( ! $this->verify_signature( $payload, $signature, $secret ) ) {
             $this->respond( 400, [ 'message' => 'Invalid signature.' ] );
