@@ -95,8 +95,8 @@ class Andw_Sct_Frontend {
         if ( $require_login && ! is_user_logged_in() ) {
             $login_url = wp_login_url( $this->get_current_url() );
 
-            /* translators: %s: login URL. */
             $login_message = sprintf(
+                /* translators: %s: login URL. */
                 __( '購入にはログインが必要です。<a href="%s">ログインはこちら</a>。', 'andw-stripe-checkout-tickets' ),
                 esc_url( $login_url )
             );
