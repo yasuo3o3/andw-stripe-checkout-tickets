@@ -245,7 +245,7 @@ class Andw_Sct_Frontend {
 
     private function get_current_url() : string {
         $request_uri_raw = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
-        $request_uri     = is_string( $request_uri_raw ) ? sanitize_text_field( $request_uri_raw ) : '';
+        $request_uri     = is_string( $request_uri_raw ) ? wp_kses_bad_protocol( $request_uri_raw, [ 'http', 'https' ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- URL path requires protocol validation only.
         if ( '' === $request_uri ) {
             return home_url( '/' );
         }
