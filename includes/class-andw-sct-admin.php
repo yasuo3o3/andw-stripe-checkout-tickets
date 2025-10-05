@@ -10,9 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Andw_Sct_Admin {
 
     public function __construct() {
-        add_action( 'admin_menu', [ , 'register_menu' ] );
-        add_action( 'admin_init', [ , 'register_settings' ] );
-        add_action( 'admin_enqueue_scripts', [ , 'enqueue_assets' ] );
+        add_action( 'admin_menu', [ $this, 'register_menu' ] );
+        add_action( 'admin_init', [ $this, 'register_settings' ] );
+        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
     }
 
     public function register_menu() : void {
@@ -21,21 +21,21 @@ class Andw_Sct_Admin {
             __( 'andW Tickets', 'andw-sct' ),
             'manage_options',
             'andw-sct',
-            [ , 'render_page' ],
+            [ $this, 'render_page' ],
             'dashicons-tickets-alt'
         );
     }
 
     public function register_settings() : void {
-        register_setting( 'andw_sct_settings', ANDW_SCT_OPTION_KEY, [ , 'sanitize' ] );
+        register_setting( 'andw_sct_settings', ANDW_SCT_OPTION_KEY, [ $this, 'sanitize' ] );
     }
 
-    public function sanitize( array  ) : array {
-        return Andw_Sct_Settings::sanitize(  );
+    public function sanitize( array $input ) : array {
+        return Andw_Sct_Settings::sanitize( $input );
     }
 
-    public function enqueue_assets( string  ) : void {
-        if ( 'toplevel_page_andw-sct' !==  ) {
+    public function enqueue_assets( string $hook_suffix ) : void {
+        if ( 'toplevel_page_andw-sct' !== $hook_suffix ) {
             return;
         }
         wp_enqueue_style( 'andw-sct-admin', ANDW_SCT_PLUGIN_URL . 'assets/css/admin.css', [], ANDW_SCT_VERSION );
@@ -46,55 +46,55 @@ class Andw_Sct_Admin {
             wp_die( esc_html__( 'You do not have permission to access this page.', 'andw-sct' ) );
         }
 
-                    = Andw_Sct_Settings::get_settings();
-               = ['sku_price_map'] ?? [];
-          = ->format_button_groups( ['button_groups'] ?? [] );
-          = ->get_environment_checks();
+        $settings           = Andw_Sct_Settings::get_settings();
+        $sku_price_map      = $settings['sku_price_map'] ?? [];
+        $button_groups_text = $this->format_button_groups( $settings['button_groups'] ?? [] );
+        $environment_checks = $this->get_environment_checks();
 
         include ANDW_SCT_PLUGIN_DIR . 'views/admin-page.php';
     }
 
-    private function format_button_groups( array  ) : string {
-         = [];
-        foreach (  as  =>  ) {
-            if ( empty(  ) ) {
-                [] = sprintf( '%s|%s|%s|%d|%s', , '', '', 1, 'false' );
+    private function format_button_groups( array $groups ) : string {
+        $lines = [];
+        foreach ( $groups as $group_slug => $buttons ) {
+            if ( empty( $buttons ) ) {
+                $lines[] = sprintf( '%s|%s|%s|%d|%s', $group_slug, '', '', 1, 'false' );
                 continue;
             }
-            foreach (  as  ) {
-                [] = sprintf(
+            foreach ( $buttons as $button ) {
+                $lines[] = sprintf(
                     '%s|%s|%s|%d|%s',
-                    ,
-                    ['sku'] ?? '',
-                    ['label'] ?? '',
-                    isset( ['qty'] ) ? (int) ['qty'] : 1,
-                    ! empty( ['require_login'] ) ? 'true' : 'false'
+                    $group_slug,
+                    $button['sku'] ?? '',
+                    $button['label'] ?? '',
+                    isset( $button['qty'] ) ? (int) $button['qty'] : 1,
+                    ! empty( $button['require_login'] ) ? 'true' : 'false'
                 );
             }
         }
 
-        return implode( "\n",  );
+        return implode( "\n", $lines );
     }
 
     private function get_environment_checks() : array {
         return [
-            'php_version'        => [
-                'label'  => __( 'PHPバージョン (推奨 8.1+)', 'andw-sct' ),
+            'php_version'    => [
+                'label'  => __( 'PHP�o�[�W���� (���� 8.1+)', 'andw-sct' ),
                 'status' => version_compare( PHP_VERSION, '8.1', '>=' ),
                 'value'  => PHP_VERSION,
             ],
-            'curl'               => [
-                'label'  => __( 'cURL拡張', 'andw-sct' ),
+            'curl'           => [
+                'label'  => __( 'cURL�g��', 'andw-sct' ),
                 'status' => function_exists( 'curl_version' ),
-                'value'  => function_exists( 'curl_version' ) ? __( '利用可能', 'andw-sct' ) : __( '未インストール', 'andw-sct' ),
+                'value'  => function_exists( 'curl_version' ) ? __( '���p�\', 'andw-sct' ) : __( '���C���X�g�[��', 'andw-sct' ),
             ],
-            'rest_available'     => [
+            'rest_available' => [
                 'label'  => __( 'WP HTTP API', 'andw-sct' ),
                 'status' => function_exists( 'wp_remote_post' ),
-                'value'  => function_exists( 'wp_remote_post' ) ? __( '利用可能', 'andw-sct' ) : __( '未定義', 'andw-sct' ),
+                'value'  => function_exists( 'wp_remote_post' ) ? __( '���p�\', 'andw-sct' ) : __( '����`', 'andw-sct' ),
             ],
-            'https'              => [
-                'label'  => __( 'サイトURL (HTTPS)', 'andw-sct' ),
+            'https'          => [
+                'label'  => __( '�T�C�gURL (HTTPS)', 'andw-sct' ),
                 'status' => str_starts_with( get_site_url(), 'https://' ),
                 'value'  => get_site_url(),
             ],

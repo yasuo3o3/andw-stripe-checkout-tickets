@@ -13,13 +13,13 @@ class Andw_Sct_Logger {
      * Ensures log table exists.
      */
     public static function maybe_install() : void {
-        global ;
-              = self::get_table_name();
-         = ->get_charset_collate();
+        global $wpdb;
+        $table_name      = self::get_table_name();
+        $charset_collate = $wpdb->get_charset_collate();
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-         = "CREATE TABLE {} (
+        $sql = "CREATE TABLE {$table_name} (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             event_id varchar(191) NOT NULL,
             type varchar(100) NOT NULL,
@@ -31,9 +31,9 @@ class Andw_Sct_Logger {
             created_at datetime NOT NULL,
             PRIMARY KEY  (id),
             UNIQUE KEY event_id (event_id)
-        ) {};";
+        ) {$charset_collate};";
 
-        dbDelta(  );
+        dbDelta( $sql );
         update_option( 'andw_sct_db_version', ANDW_SCT_DB_VERSION );
     }
 
@@ -41,42 +41,42 @@ class Andw_Sct_Logger {
      * Drops the log table.
      */
     public static function uninstall() : void {
-        global ;
-         = self::get_table_name();
-        ->query( "DROP TABLE IF EXISTS {}" );
+        global $wpdb;
+        $table = self::get_table_name();
+        $wpdb->query( "DROP TABLE IF EXISTS {$table}" );
         delete_option( 'andw_sct_db_version' );
     }
 
     /**
      * Inserts a log entry.
      */
-    public static function insert( array  ) : bool {
-        global ;
-         = [
-            'event_id'    => '',
-            'type'        => '',
-            'session_id'  => '',
-            'customer_id' => '',
-            'email'       => '',
-            'amount_total'=> 0,
-            'currency'    => '',
-            'created_at'  => current_time( 'mysql', 1 ),
+    public static function insert( array $entry ) : bool {
+        global $wpdb;
+        $defaults = [
+            'event_id'     => '',
+            'type'         => '',
+            'session_id'   => '',
+            'customer_id'  => '',
+            'email'        => '',
+            'amount_total' => 0,
+            'currency'     => '',
+            'created_at'   => current_time( 'mysql', 1 ),
         ];
-         = wp_parse_args( ,  );
-        if ( empty( ['event_id'] ) ) {
+        $entry = wp_parse_args( $entry, $defaults );
+        if ( empty( $entry['event_id'] ) ) {
             return false;
         }
-        return (bool) ->insert(
+        return (bool) $wpdb->insert(
             self::get_table_name(),
             [
-                'event_id'    => sanitize_text_field( ['event_id'] ),
-                'type'        => sanitize_text_field( ['type'] ),
-                'session_id'  => sanitize_text_field( ['session_id'] ),
-                'customer_id' => sanitize_text_field( ['customer_id'] ),
-                'email'       => sanitize_email( ['email'] ),
-                'amount_total'=> absint( ['amount_total'] ),
-                'currency'    => sanitize_text_field( strtolower( ['currency'] ) ),
-                'created_at'  => gmdate( 'Y-m-d H:i:s', strtotime( ['created_at'] ) ),
+                'event_id'     => sanitize_text_field( $entry['event_id'] ),
+                'type'         => sanitize_text_field( $entry['type'] ),
+                'session_id'   => sanitize_text_field( $entry['session_id'] ),
+                'customer_id'  => sanitize_text_field( $entry['customer_id'] ),
+                'email'        => sanitize_email( $entry['email'] ),
+                'amount_total' => absint( $entry['amount_total'] ),
+                'currency'     => sanitize_text_field( strtolower( $entry['currency'] ) ),
+                'created_at'   => gmdate( 'Y-m-d H:i:s', strtotime( $entry['created_at'] ) ),
             ],
             [
                 '%s',
@@ -94,50 +94,46 @@ class Andw_Sct_Logger {
     /**
      * Determines if an event has already been logged.
      */
-    public static function event_exists( string  ) : bool {
-        global ;
-         = self::get_table_name();
-         = ->get_var( ->prepare( "SELECT id FROM {} WHERE event_id = %s LIMIT 1",  ) );
-        return ! empty(  );
+    public static function event_exists( string $event_id ) : bool {
+        global $wpdb;
+        $table = self::get_table_name();
+        $sql   = $wpdb->prepare( "SELECT id FROM {$table} WHERE event_id = %s LIMIT 1", $event_id );
+        return (bool) $wpdb->get_var( $sql );
     }
 
     /**
      * Returns log entries for a given customer ID.
      */
-    public static function get_by_customer( string , int  = 20 ) : array {
-        global ;
-         = self::get_table_name();
-        return ->get_results(
-            ->prepare(
-                "SELECT * FROM {} WHERE customer_id = %s ORDER BY created_at DESC LIMIT %d",
-                ,
-                absint(  )
-            ),
-            ARRAY_A
-        ) ?: [];
+    public static function get_by_customer( string $customer_id, int $limit = 20 ) : array {
+        global $wpdb;
+        $table = self::get_table_name();
+        $sql   = $wpdb->prepare(
+            "SELECT * FROM {$table} WHERE customer_id = %s ORDER BY created_at DESC LIMIT %d",
+            $customer_id,
+            absint( $limit )
+        );
+        return $wpdb->get_results( $sql, ARRAY_A ) ?: [];
     }
 
     /**
      * Returns log entries for a given email.
      */
-    public static function get_by_email( string , int  = 20 ) : array {
-        global ;
-         = self::get_table_name();
-        return ->get_results(
-            ->prepare(
-                "SELECT * FROM {} WHERE email = %s ORDER BY created_at DESC LIMIT %d",
-                ,
-                absint(  )
-            ),
-            ARRAY_A
-        ) ?: [];
+    public static function get_by_email( string $email, int $limit = 20 ) : array {
+        global $wpdb;
+        $table = self::get_table_name();
+        $sql   = $wpdb->prepare(
+            "SELECT * FROM {$table} WHERE email = %s ORDER BY created_at DESC LIMIT %d",
+            $email,
+            absint( $limit )
+        );
+        return $wpdb->get_results( $sql, ARRAY_A ) ?: [];
     }
 
     /**
      * Table name helper.
      */
     public static function get_table_name() : string {
-        global ;
-        return ->prefix . 'andw_sct_logs';
+        global $wpdb;
+        return $wpdb->prefix . 'andw_sct_logs';
     }
 }

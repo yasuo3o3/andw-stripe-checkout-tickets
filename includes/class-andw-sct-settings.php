@@ -13,29 +13,29 @@ class Andw_Sct_Settings {
      * Returns the full settings array merged with defaults.
      */
     public static function get_settings() : array {
-         = get_option( ANDW_SCT_OPTION_KEY, [] );
-        if ( ! is_array(  ) ) {
-             = [];
+        $settings = get_option( ANDW_SCT_OPTION_KEY, [] );
+        if ( ! is_array( $settings ) ) {
+            $settings = [];
         }
 
-        return wp_parse_args( , self::get_defaults() );
+        return wp_parse_args( $settings, self::get_defaults() );
     }
 
     /**
      * Returns a single setting by key.
      */
-    public static function get( string ,  = null ) {
-         = self::get_settings();
-        return [  ] ?? ;
+    public static function get( string $key, $default = null ) {
+        $settings = self::get_settings();
+        return $settings[ $key ] ?? $default;
     }
 
     /**
      * Updates settings after sanitizing.
      */
-    public static function update_settings( array  ) : array {
-         = self::sanitize(  );
-        update_option( ANDW_SCT_OPTION_KEY, , true );
-        return ;
+    public static function update_settings( array $settings ) : array {
+        $sanitized = self::sanitize( $settings );
+        update_option( ANDW_SCT_OPTION_KEY, $sanitized, true );
+        return $sanitized;
     }
 
     /**
@@ -49,7 +49,7 @@ class Andw_Sct_Settings {
             'default_success_url'  => '',
             'default_cancel_url'   => '',
             'consent_enabled'      => false,
-            'consent_text'         => __( 'チケット購入にあたり、利用規約とプライバシーポリシーに同意します。', 'andw-sct' ),
+            'consent_text'         => __( '�`�P�b�g�w���ɂ�����A���p�K��ƃv���C�o�V�[�|���V�[�ɓ��ӂ��܂��B', 'andw-sct' ),
             'sku_price_map'        => [],
             'button_groups'        => [
                 'default' => [],
@@ -57,7 +57,7 @@ class Andw_Sct_Settings {
             'default_button_group' => 'default',
             'meeting_form_url'     => '',
             'support_link_url'     => '',
-            'support_link_text'    => __( '誤ったメールを受け取った場合はこちらからご連絡ください。', 'andw-sct' ),
+            'support_link_text'    => __( '��������[�����󂯎�����ꍇ�͂����炩�炲�A�����������B', 'andw-sct' ),
             'line_url'             => '',
             'chat_url'             => '',
         ];
@@ -66,107 +66,104 @@ class Andw_Sct_Settings {
     /**
      * Sanitizes the incoming settings payload.
      */
-    public static function sanitize( array  ) : array {
-         = self::get_defaults();
+    public static function sanitize( array $settings ) : array {
+        $defaults = self::get_defaults();
 
-         = [
-            'publishable_key'      => isset( ['publishable_key'] ) ? sanitize_text_field( ['publishable_key'] ) : ['publishable_key'],
-            'secret_key'           => isset( ['secret_key'] ) ? sanitize_text_field( ['secret_key'] ) : ['secret_key'],
-            'webhook_secret'       => isset( ['webhook_secret'] ) ? sanitize_text_field( ['webhook_secret'] ) : ['webhook_secret'],
-            'default_success_url'  => isset( ['default_success_url'] ) ? esc_url_raw( ['default_success_url'] ) : ['default_success_url'],
-            'default_cancel_url'   => isset( ['default_cancel_url'] ) ? esc_url_raw( ['default_cancel_url'] ) : ['default_cancel_url'],
-            'consent_enabled'      => ! empty( ['consent_enabled'] ),
-            'consent_text'         => isset( ['consent_text'] ) ? wp_kses_post( ['consent_text'] ) : ['consent_text'],
-            'default_button_group' => isset( ['default_button_group'] ) ? sanitize_key( ['default_button_group'] ) : ['default_button_group'],
-            'meeting_form_url'     => isset( ['meeting_form_url'] ) ? esc_url_raw( ['meeting_form_url'] ) : ['meeting_form_url'],
-            'support_link_url'     => isset( ['support_link_url'] ) ? esc_url_raw( ['support_link_url'] ) : ['support_link_url'],
-            'support_link_text'    => isset( ['support_link_text'] ) ? sanitize_text_field( ['support_link_text'] ) : ['support_link_text'],
-            'line_url'             => isset( ['line_url'] ) ? esc_url_raw( ['line_url'] ) : ['line_url'],
-            'chat_url'             => isset( ['chat_url'] ) ? esc_url_raw( ['chat_url'] ) : ['chat_url'],
+        $clean = [
+            'publishable_key'      => isset( $settings['publishable_key'] ) ? sanitize_text_field( $settings['publishable_key'] ) : $defaults['publishable_key'],
+            'secret_key'           => isset( $settings['secret_key'] ) ? sanitize_text_field( $settings['secret_key'] ) : $defaults['secret_key'],
+            'webhook_secret'       => isset( $settings['webhook_secret'] ) ? sanitize_text_field( $settings['webhook_secret'] ) : $defaults['webhook_secret'],
+            'default_success_url'  => isset( $settings['default_success_url'] ) ? esc_url_raw( $settings['default_success_url'] ) : $defaults['default_success_url'],
+            'default_cancel_url'   => isset( $settings['default_cancel_url'] ) ? esc_url_raw( $settings['default_cancel_url'] ) : $defaults['default_cancel_url'],
+            'consent_enabled'      => ! empty( $settings['consent_enabled'] ),
+            'consent_text'         => isset( $settings['consent_text'] ) ? wp_kses_post( $settings['consent_text'] ) : $defaults['consent_text'],
+            'default_button_group' => isset( $settings['default_button_group'] ) ? sanitize_key( $settings['default_button_group'] ) : $defaults['default_button_group'],
+            'meeting_form_url'     => isset( $settings['meeting_form_url'] ) ? esc_url_raw( $settings['meeting_form_url'] ) : $defaults['meeting_form_url'],
+            'support_link_url'     => isset( $settings['support_link_url'] ) ? esc_url_raw( $settings['support_link_url'] ) : $defaults['support_link_url'],
+            'support_link_text'    => isset( $settings['support_link_text'] ) ? sanitize_text_field( $settings['support_link_text'] ) : $defaults['support_link_text'],
+            'line_url'             => isset( $settings['line_url'] ) ? esc_url_raw( $settings['line_url'] ) : $defaults['line_url'],
+            'chat_url'             => isset( $settings['chat_url'] ) ? esc_url_raw( $settings['chat_url'] ) : $defaults['chat_url'],
         ];
 
-        ['sku_price_map'] = [];
-        if ( ! empty( ['sku_price_map'] ) && is_array( ['sku_price_map'] ) ) {
-            foreach ( ['sku_price_map'] as  ) {
-                if ( empty( ['sku'] ) || empty( ['price_id'] ) ) {
+        $clean['sku_price_map'] = [];
+        if ( ! empty( $settings['sku_price_map'] ) && is_array( $settings['sku_price_map'] ) ) {
+            foreach ( $settings['sku_price_map'] as $row ) {
+                if ( empty( $row['sku'] ) || empty( $row['price_id'] ) ) {
                     continue;
                 }
-                      = sanitize_key( ['sku'] );
-                 = sanitize_text_field( ['price_id'] );
-                if ( '' ===  || '' ===  ) {
+                $sku      = sanitize_key( $row['sku'] );
+                $price_id = sanitize_text_field( $row['price_id'] );
+                if ( '' === $sku || '' === $price_id ) {
                     continue;
                 }
-                ['sku_price_map'][] = [
-                    'sku'      => ,
-                    'price_id' => ,
+                $clean['sku_price_map'][] = [
+                    'sku'      => $sku,
+                    'price_id' => $price_id,
                 ];
             }
         }
 
-        ['button_groups'] = [];
+        $clean['button_groups'] = [];
 
-        if ( isset( ['button_groups_text'] ) ) {
-             = preg_split( '/\r?\n/', (string) ['button_groups_text'] );
-            foreach (  as  ) {
-                 = trim(  );
-                if ( '' ===  || str_starts_with( , '#' ) ) {
+        if ( isset( $settings['button_groups_text'] ) ) {
+            $lines = preg_split( '/\r?\n/', (string) $settings['button_groups_text'] );
+            foreach ( $lines as $line ) {
+                $line = trim( $line );
+                if ( '' === $line || str_starts_with( $line, '#' ) ) {
                     continue;
                 }
-                 = array_map( 'trim', explode( '|',  ) );
-                if ( count(  ) < 4 ) {
-                    continue;
-                }
-                [ , , ,  ] = array_pad( , 4, '' );
-                 = isset( [4] ) ? filter_var( [4], FILTER_VALIDATE_BOOLEAN ) : false;
+                $parts          = array_map( 'trim', explode( '|', $line ) );
+                $parts          = array_pad( $parts, 5, '' );
+                [ $group_slug, $sku, $label, $qty, $requires_login ] = $parts;
 
-                 = sanitize_key(  );
-                if ( '' ===  ) {
+                $group_slug = sanitize_key( $group_slug );
+                if ( '' === $group_slug ) {
                     continue;
                 }
 
-                if ( ! isset( ['button_groups'][  ] ) ) {
-                    ['button_groups'][  ] = [];
+                if ( ! isset( $clean['button_groups'][ $group_slug ] ) ) {
+                    $clean['button_groups'][ $group_slug ] = [];
                 }
 
-                ['button_groups'][  ][] = [
-                    'sku'           => sanitize_key(  ),
-                    'label'         => sanitize_text_field(  ),
-                    'qty'           => max( 1, absint(  ) ),
-                    'require_login' => (bool) ,
+                $clean['button_groups'][ $group_slug ][] = [
+                    'sku'           => sanitize_key( $sku ),
+                    'label'         => sanitize_text_field( $label ),
+                    'qty'           => max( 1, absint( $qty ) ),
+                    'require_login' => (bool) filter_var( $requires_login, FILTER_VALIDATE_BOOLEAN ),
                 ];
             }
-        } elseif ( ! empty( ['button_groups'] ) && is_array( ['button_groups'] ) ) {
-            foreach ( ['button_groups'] as  =>  ) {
-                 = sanitize_key( (string)  );
-                if ( '' ===  ) {
+        } elseif ( ! empty( $settings['button_groups'] ) && is_array( $settings['button_groups'] ) ) {
+            foreach ( $settings['button_groups'] as $group_slug => $buttons ) {
+                $group_slug = sanitize_key( (string) $group_slug );
+                if ( '' === $group_slug ) {
                     continue;
                 }
-                ['button_groups'][  ] = [];
-                if ( ! is_array(  ) ) {
+                $clean['button_groups'][ $group_slug ] = [];
+                if ( ! is_array( $buttons ) ) {
                     continue;
                 }
-                foreach (  as  ) {
-                    if ( empty( ['sku'] ) ) {
+                foreach ( $buttons as $button ) {
+                    if ( empty( $button['sku'] ) ) {
                         continue;
                     }
-                    ['button_groups'][  ][] = [
-                        'sku'           => sanitize_key( ['sku'] ),
-                        'label'         => isset( ['label'] ) ? sanitize_text_field( ['label'] ) : '',
-                        'qty'           => isset( ['qty'] ) ? max( 1, absint( ['qty'] ) ) : 1,
-                        'require_login' => ! empty( ['require_login'] ),
+                    $clean['button_groups'][ $group_slug ][] = [
+                        'sku'           => sanitize_key( $button['sku'] ),
+                        'label'         => isset( $button['label'] ) ? sanitize_text_field( $button['label'] ) : '',
+                        'qty'           => isset( $button['qty'] ) ? max( 1, absint( $button['qty'] ) ) : 1,
+                        'require_login' => ! empty( $button['require_login'] ),
                     ];
                 }
             }
         }
 
-        if ( empty( ['button_groups'] ) ) {
-            ['button_groups'] = ['button_groups'];
+        if ( empty( $clean['button_groups'] ) ) {
+            $clean['button_groups'] = $defaults['button_groups'];
         }
 
-        if ( ! isset( ['button_groups'][ ['default_button_group'] ] ) ) {
-            ['default_button_group'] = array_key_first( ['button_groups'] );
+        if ( ! isset( $clean['button_groups'][ $clean['default_button_group'] ] ) ) {
+            $clean['default_button_group'] = array_key_first( $clean['button_groups'] );
         }
 
-        return ;
+        return $clean;
     }
 }

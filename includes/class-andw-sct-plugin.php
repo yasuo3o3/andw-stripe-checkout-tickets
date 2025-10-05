@@ -9,39 +9,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Andw_Sct_Plugin {
 
-    private static ?Andw_Sct_Plugin  = null;
+    private static ?Andw_Sct_Plugin $instance = null;
 
-    private Andw_Sct_Admin ;
+    private Andw_Sct_Admin $admin;
 
-    private Andw_Sct_Checkout ;
+    private Andw_Sct_Checkout $checkout;
 
-    private Andw_Sct_Frontend ;
+    private Andw_Sct_Frontend $frontend;
 
-    private Andw_Sct_Registration ;
+    private Andw_Sct_Registration $registration;
 
-    private Andw_Sct_Webhook ;
+    private Andw_Sct_Webhook $webhook;
 
     /**
      * Returns the singleton instance.
      */
     public static function instance() : Andw_Sct_Plugin {
-        if ( null === self:: ) {
-            self:: = new self();
+        if ( null === self::$instance ) {
+            self::$instance = new self();
         }
-        return self::;
+        return self::$instance;
     }
 
     /**
      * Plugin constructor.
      */
     private function __construct() {
-        ->checkout     = new Andw_Sct_Checkout();
-        ->registration = new Andw_Sct_Registration( ->checkout );
-        ->frontend     = new Andw_Sct_Frontend( ->checkout, ->registration );
-        ->admin        = new Andw_Sct_Admin();
-        ->webhook      = new Andw_Sct_Webhook();
+        $this->checkout     = new Andw_Sct_Checkout();
+        $this->registration = new Andw_Sct_Registration( $this->checkout );
+        $this->frontend     = new Andw_Sct_Frontend( $this->checkout, $this->registration );
+        $this->admin        = new Andw_Sct_Admin();
+        $this->webhook      = new Andw_Sct_Webhook();
 
-        add_action( 'init', [ , 'maybe_upgrade_db' ] );
+        add_action( 'init', [ $this, 'maybe_upgrade_db' ] );
     }
 
     /**
@@ -65,8 +65,8 @@ class Andw_Sct_Plugin {
      * Ensures database schema is up-to-date.
      */
     public function maybe_upgrade_db() : void {
-         = get_option( 'andw_sct_db_version' );
-        if ( version_compare( (string) , ANDW_SCT_DB_VERSION, '<' ) ) {
+        $current_version = get_option( 'andw_sct_db_version' );
+        if ( version_compare( (string) $current_version, ANDW_SCT_DB_VERSION, '<' ) ) {
             Andw_Sct_Logger::maybe_install();
         }
     }
