@@ -24,5 +24,4 @@ delete_option( ANDW_SCT_OPTION_KEY );
 delete_option( 'andw_sct_version' );
 delete_option( 'andw_sct_db_version' );
 
-global $wpdb;
-$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->usermeta} WHERE meta_key = %s", 'andw_sct_stripe_customer_id' ) );
+delete_metadata( 'user', 0, 'andw_sct_stripe_customer_id', '', true );

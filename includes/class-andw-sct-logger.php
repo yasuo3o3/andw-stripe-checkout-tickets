@@ -67,7 +67,7 @@ class Andw_Sct_Logger {
             return false;
         }
 
-        $result = (bool) $wpdb->insert(
+        $result = (bool) $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom logging table requires direct query
             self::get_table_name(),
             [
                 'event_id'     => sanitize_text_field( $entry['event_id'] ),
@@ -117,11 +117,10 @@ class Andw_Sct_Logger {
         }
 
         global $wpdb;
-        $table_name = esc_sql( self::get_table_name() );
-        $sql = sprintf( "SELECT id FROM %s WHERE event_id = %%s LIMIT 1", $table_name );
+        $table_name = self::get_table_name();
         $found = (bool) $wpdb->get_var(
             $wpdb->prepare(
-                $sql,
+                "SELECT id FROM {$table_name} WHERE event_id = %s LIMIT 1",
                 $event_id
             )
         ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Caching handled above.
@@ -142,11 +141,10 @@ class Andw_Sct_Logger {
         }
 
         global $wpdb;
-        $table_name = esc_sql( self::get_table_name() );
-        $sql = sprintf( "SELECT * FROM %s WHERE customer_id = %%s ORDER BY created_at DESC LIMIT %%d", $table_name );
+        $table_name = self::get_table_name();
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                $sql,
+                "SELECT * FROM {$table_name} WHERE customer_id = %s ORDER BY created_at DESC LIMIT %d",
                 $customer_id,
                 absint( $limit )
             ),
@@ -171,11 +169,10 @@ class Andw_Sct_Logger {
         }
 
         global $wpdb;
-        $table_name = esc_sql( self::get_table_name() );
-        $sql = sprintf( "SELECT * FROM %s WHERE email = %%s ORDER BY created_at DESC LIMIT %%d", $table_name );
+        $table_name = self::get_table_name();
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                $sql,
+                "SELECT * FROM {$table_name} WHERE email = %s ORDER BY created_at DESC LIMIT %d",
                 $normalized,
                 absint( $limit )
             ),
